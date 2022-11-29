@@ -45,4 +45,4 @@ get_data.sh
 ```
 The result is displayed in the ./protein_A/bp(cc,mf)_result.csv
 ## Dependencies
-PFmap is tested to work under Python 3.8. and  cudnn 11.2.
+PFmap is tested to work under Python 3.8. and  cuda 11.2.
