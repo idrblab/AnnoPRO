@@ -13,11 +13,13 @@
 ![image](https://user-images.githubusercontent.com/76670356/204524869-31f558f0-0298-48c5-b4d2-3d5d087a2def.png)
 ## Installation
 1. install gcc and  Profeat firstly.
-
 ```bash
 git clone https://github.com/idrblab/PFmap.git
 cd PFmap
 conda create -n PFmap python=3.8
 conda activate PFmap
 pip install -r requirements.txt
+unrar x ./profeat-new-version.rar
+cd ./profeat-new-version
+gfortran pro-des-35.f -o profeat
 ```
