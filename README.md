@@ -25,7 +25,7 @@ gfortran pro-des-35.f -o profeat
 cp ./input-param.data ./profeat-new-version
 ```
 The Profeat software source code uses Fortran language. It requires a related compilation environment (gcc) to run normally.<br /> 
-2. generate proteins features
+2. generate proteins features <br />
 upload your protein fasta file into the input-protein.dat
 ```bash
 profeat
