@@ -19,10 +19,10 @@ cd PFmap
 conda create -n PFmap python=3.8
 conda activate PFmap
 pip install -r requirements.txt
-unrar x ./profeat-new-version.rar
-cd ./profeat-new-version
+unrar x profeat-new-version.rar
+cd profeat-new-version
 gfortran pro-des-35.f -o profeat
-cp ./input-param.data ./profeat-new-version
+cp ./PFmap/input-param.data ./PFmap/profeat-new-version
 ```
 The Profeat software source code uses Fortran language. It requires a related compilation environment (gcc) to run normally.<br /> 
 2. generate proteins features <br />
@@ -37,11 +37,12 @@ cp input-protein.dat out-protein.dat protein_A
 3. get database
 ```bash
 cd ./
-get_data.sh
+./PFmap/get_data.sh
 ```
 4. predict proteins functions
 ```bash
-./predict.sh protein_A
+cd PFmap
+predict.sh protein_A
 ```
 The result is displayed in the ./protein_A/bp(cc,mf)_result.csv
 ## Dependencies
