@@ -5,6 +5,9 @@ import pandas as pd
 import numpy as np
 from xml.etree import ElementTree as ET
 import math
+import os, sys
+
+os.chdir(sys.path[0])
 
 BIOLOGICAL_PROCESS = 'GO:0008150'
 MOLECULAR_FUNCTION = 'GO:0003674'
@@ -38,7 +41,7 @@ def is_exp_code(code):
 
 class Ontology(object):
 
-    def __init__(self, filename='/home/zhengly/promap/data/CAFA/go.txt', with_rels=False):
+    def __init__(self, filename='../data/go.txt', with_rels=False):
         self.ont = self.load(filename, with_rels)
         self.ic = None
 
