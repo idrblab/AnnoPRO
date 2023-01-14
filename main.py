@@ -12,13 +12,30 @@ import math
 import pickle
 from collections import defaultdict
 from tqdm import tqdm
-sys.path.insert(1,'../PFmap/data_procession')
-from utils import Ontology
+from PFmap.data_procession.utils import Ontology
+from PFmap.focal_loss import BinaryFocalLoss
 
-sys.path.insert(1,'../PFmap')
-from focal_loss import BinaryFocalLoss
+import argparse
 
 os.chdir(sys.path[0])
+
+
+parser = argparse.ArgumentParser(description='Arguments for main.py')
+parser.add_argument('--file_path', default=None, type=str)
+parser.add_argument('--gpu', action='store_true', default=True)
+parser.add_argument('--used_gpu', default="0", type=str)
+parser.add_argument('--with_diamond', default='Y', type=str)
+args = parser.parse_args()
+
+
+case_file=os.path.join(args.file_path,"case.txt")
+protein_file=os.path.join(args.file_path,"protein.pkl")
+
+
+if args.file_path == None:
+    raise ValueError("Must provide the input fasta sequences.")
+if args.gpu == True:
+    os.environ["CUDA_VISIBLE_DEVICES"] = args.used_gpu
 
 class DFGenerator(Sequence):
     def __init__(self, df, terms_dict, nb_classes, batch_size):
@@ -72,9 +89,9 @@ class DFGenerator(Sequence):
             return self.next()
 
 def diamond_score(diamond_scores_file, label, data_path,term_path):
-    with open("../PFmap/data/go.pkl", 'rb') as file:
+    with open("PFmap/data/go.pkl", 'rb') as file:
         go = pickle.loads(file.read())
-    train_df = pd.read_pickle("../PFmap/data/cafa_train.pkl")
+    train_df = pd.read_pickle("PFmap/data/cafa_train.pkl")
     test_df = pd.read_pickle(data_path)
     annotations = train_df['Prop_annotations'].values
     annotations = list(map(lambda x: set(x), annotations))
@@ -142,14 +159,15 @@ def plot_curve(history):
     plt.legend()
 
 
-def init_evaluate(model_file, data_path, term_path, diamond=True, data_size=8000, batch_size=16):
+def init_evaluate(model_file, data_path, term_path, data_size=8000, batch_size=16):
     with open(term_path, 'rb') as file:
         terms_df = pickle.load(file)
-    data_df=pd.read_pickle(data_path)
+    with open(data_path, 'rb') as file:
+        data_df = pickle.load(file)
     if len(data_df) > data_size:
         data_df = data_df.sample(n=data_size)
     data_df.index=range(len(data_df))
-    model = load_model(f'../PFmap/model_parm/{model_file}.h5',custom_objects={"focus_loss":BinaryFocalLoss})
+    model = load_model(f'PFmap/model_param/{model_file}.h5',custom_objects={"focus_loss":BinaryFocalLoss})
     proteins=data_df["Proteins"]
     terms = terms_df['terms'].values.flatten()
     terms_dict = {v: i for i, v in enumerate(terms)}
@@ -157,7 +175,7 @@ def init_evaluate(model_file, data_path, term_path, diamond=True, data_size=8000
     data_generator = DFGenerator(data_df, terms_dict, nb_classes, batch_size)
     data_steps = int(math.ceil(len(data_df) / batch_size))
     preds = model.predict(data_generator, steps=data_steps)
-    if diamond:
+    if args.with_diamond=='Y':
         preds=diamond_score(case_file,preds,data_path,term_path=term_path)
     # label_di=defaultdict(list)
     protein=[]
@@ -177,3 +195,7 @@ def init_evaluate(model_file, data_path, term_path, diamond=True, data_size=8000
     result_file=os.path.join(args.file_path,f"{model_file}_result.csv")
     res.to_csv(result_file,sep=',',index=False,header=True)
     return res
+
+init_evaluate('mf',protein_file,term_path='PFmap/data/terms_molecular_function.pkl')
+init_evaluate('bp',protein_file,term_path='PFmap/data/terms_biological_process.pkl')
+init_evaluate('cc',protein_file,term_path='PFmap/data/terms_cellular_component.pkl')

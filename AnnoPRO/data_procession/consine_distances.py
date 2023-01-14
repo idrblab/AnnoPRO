@@ -26,10 +26,10 @@ def calculate_consine(file,num,standard_type=['minmax','standard'],var_thr = e**
         data=MinMaxScaleClip(data)
     elif standard_type=='standard':
         data=StandardScaler(data)
-    np.save("/home/zhengly/promap/promap/data_processing/error1.npy",data)
+    # np.save("/home/zhengly/promap/promap/data_processing/error1.npy",data)
     result=np.mat(data)
     result=np.transpose(result)
-    np.save("/home/zhengly/promap/promap/data_processing/error.npy",data)
+    # np.save("/home/zhengly/promap/promap/data_processing/error.npy",data)
     consine_similarity=np.array(1)-cosine_similarity(result)
     for i in range(len(consine_similarity)):
         for j in range(len(consine_similarity[0])):

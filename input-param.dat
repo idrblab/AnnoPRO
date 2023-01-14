@@ -1,0 +1,31 @@
+(S1)  ipp:  =1:for protein sequence ;   =2:  for ligands ;   =3: for portein- protein interaction; =4: for  protein-ligand interaction
+     1
+(S2) iaac: Amino acid composition*100(iaac=1) or sequence-segmented amino acid composition(iaac>1,the number of segment)
+     1
+(S3) idpc: Dipeptide composition*100i(idpc=1) or sequence-segmented dipeptide composition (idpc>1)
+     1
+(S4) line1:iatd=1 or 0: do or not do autocorrelation descriptors, nlag: maximum lag of the autocorrelation (< length of the sequencesegment and usually 30);line 2: choice of imb, imoran, igeary for if claculation is done for M-B, Moran and Geary, respectively; line3: number of amino acid index and the corresponding serial number in index-database.dat.
+     1,30
+     1,1,1
+     3,115,485,486
+(S5) ictd:composition,transition, distribution(CTD) or sequence-segmented CTD
+    1
+(S6) iqso: Quasi-sequence-order descriptors(QSO) (iqso=1) or sequence-segmented QSO(iqso>1),nphi:maximum of the rank of the sequence-order-coupling number(<length of the sequence  segment,usually 30)
+     1,30
+(S7) (line 1:) ipaac : pseudo-amino acid composition (PAAC)(ipaac=1) or sequence-segmented PAAC (upaac>1); line 2: w1: weighting factor, lamda1: maximum number of the tier correlation factor(< length of the sequence segment, usually 30); line3: nacp1: number of set of amino acid properties; followed by nacp1 lines: in each line: number of amino acid i that will be used to get the averaged correlation and the corresponding amino acid index serial number in input-aaindexdb.dat.
+     1 
+    0.05,30
+    1
+    3,115,485,486
+(S8) iapaac : amphiphilic pseudo-amino acid composition (APAAC) (iapaac=1) or sequence-segmented APAAC(iapaac>1) 
+     1
+    0.05,30
+(S9) istop and ibcut: topological descriptors for atom model or Sequence-segmented topoloigcial descriptors; BCUT descriptors.
+     0,0
+(S10) line 1: iaap: total amino acid prpperties (iapp=1) or sequence-segmented sum of amino acid property(iapp>1); line 2: number of amino acid property and the corresponding serial number in input-aindex.dat
+     0
+     3,1,2,5 
+(S11) methodpp: method for the construction of descriptors from two protein descriptors
+      0
+(S12)  methodpl: method for the construction of descriptors from  the protein descriptors and the ligand descriptors
+      0
