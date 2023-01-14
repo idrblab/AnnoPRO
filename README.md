@@ -1,4 +1,3 @@
-<<<<<<< main
 # AnnoPRO
 ![AUR](https://img.shields.io/badge/license-MIT-blue.svg)
 ![python](https://img.shields.io/badge/python->=3.8-success.svg)
@@ -41,7 +40,6 @@ cp input-protein.dat out-protein.dat protein_A
 ```
 3. get database
 ```bash
-<<<<<<< main
 cd ../
 ./AnnoPRO/get_data.sh
 ```
