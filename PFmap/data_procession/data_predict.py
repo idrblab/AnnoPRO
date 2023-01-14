@@ -6,11 +6,14 @@ from sklearn.metrics.pairwise import cosine_similarity
 from tqdm import tqdm
 from utils import Ontology
 from erro import feature_to_csv
+import os, sys
+
+os.chdir(sys.path[0])
 
 
 class Data_process():
 
-    def __init__(self,protein_file,split_file,save_file,num,grid_file="/home/zhengly/PFmap/PFmap/data/data_grid.pkl",assess_file="/home/zhengly/PFmap/PFmap/data/row_asses.pkl",prosim_file="/home/zhengly/PFmap/PFmap/data/cafa4_del.csv",go_file="/home/zhengly/PFmap/PFmap/data/go.pkl"):
+    def __init__(self,protein_file,split_file,save_file,num,grid_file="../data/data_grid.pkl",assess_file="../data/row_asses.pkl",prosim_file="../data/cafa4_del.csv",go_file="../data/go.pkl"):
         '''
         protein_file 是生成的蛋白特征文件，即profeat生成的文件
         split_file是需要包含所需信息的蛋白序列文件,
@@ -32,7 +35,7 @@ class Data_process():
         proteins_f=feature_to_csv(self.protein_file)
         proteins_f.dropna(axis=0,inplace=True)
         feature_data=proteins_f.iloc[:,:self.num]
-        mia_data=load_data("/home/zhengly/PFmap/PFmap/data/cafa4_del.csv",1485)
+        mia_data=load_data("../data/cafa4_del.csv",1485)
         mia_data.columns=range(len(mia_data.columns))
         feature_data=(feature_data - mia_data.min()) / ((mia_data.max() - mia_data.min()) + 1e-8)
         self.feature_data=feature_data

@@ -2,7 +2,9 @@ from data_predict import Data_process
 # from absl import flags
 # import tensorflow.compat.v1 as tf
 import argparse
-import os
+import os, sys
+
+os.chdir(sys.path[0])
 parser = argparse.ArgumentParser(description='Arguments for main.py')
 parser.add_argument('--file_path', default=None, type=str)
 args = parser.parse_args()

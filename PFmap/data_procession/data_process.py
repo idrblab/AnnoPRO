@@ -4,10 +4,13 @@ import pickle
 import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
 from tqdm import tqdm
+import os, sys
+
+os.chdir(sys.path[0])
 
 class Data_process():
 
-    def __init__(self,protein_file,split_file,save_file,num,grid_file="/home/zhengly/PFmap/PFmap/data/data_grid.pkl",assess_file="/home/zhengly/PFmap/PFmap/data/row_asses.pkl",prosim_file="/home/zhengly/PFmap/PFmap/data/cafa4_del.csv",go_file="/home/zhengly/PFmap/PFmap/data/go.pkl"):
+    def __init__(self,protein_file,split_file,save_file,num,grid_file="../data/data_grid.pkl",assess_file="../data/row_asses.pkl",prosim_file="../data/cafa4_del.csv",go_file="../data/go.pkl"):
         '''
         protein_file 是生成的蛋白特征文件，
         split_file是需要包含所需信息的蛋白文件,
@@ -26,7 +29,7 @@ class Data_process():
         self.__data__()
 
     def __data__(self):
-        df_data=load_data("/home/zhengly/PFmap/PFmap/data/cafa4_del.csv",1485)
+        df_data=load_data("../data/cafa4_del.csv",1485)
         min_data=df_data.min()
         max_data=df_data.max()
         feature_data=load_data(self.protein_file,num=self.num)

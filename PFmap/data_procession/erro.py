@@ -35,6 +35,6 @@ def feature_to_csv(data_path):
     data = pd.DataFrame(feature_list)
     data=data.T
     return data
-feature_list=feature_to_csv("/home/zhengly/promap/promap/example/gdf/output-protein.dat")
-data = pd.DataFrame(feature_list)
-data.T.to_csv("/home/zhengly/promap/promap/example/gdf/dgf.csv", header=None)
+# feature_list=feature_to_csv("/home/zhengly/promap/promap/example/gdf/output-protein.dat")
+# data = pd.DataFrame(feature_list)
+# data.T.to_csv("/home/zhengly/promap/promap/example/gdf/dgf.csv", header=None)
