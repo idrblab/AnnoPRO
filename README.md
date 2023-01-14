@@ -1,4 +1,12 @@
+<<<<<<< main
 # AnnoPRO
+=======
+# PFmap
+![AUR](https://img.shields.io/badge/license-MIT-blue.svg)
+![python](https://img.shields.io/badge/python->=3.8-success.svg)
+![keras](https://img.shields.io/badge/keras-2.5.0-success.svg)
+![PMID](https://img.shields.io/badge/PMID-Not%20available-red.svg)
+>>>>>>> main
 ## Promap generation
 * step 1: input proteins sequeces
 * step 2: features extraction by Profeat
@@ -36,6 +44,7 @@ cp input-protein.dat out-protein.dat protein_A
 ```
 3. get database
 ```bash
+<<<<<<< main
 cd ../
 ./AnnoPRO/get_data.sh
 ```
@@ -43,7 +52,16 @@ cd ../
 ```bash
 cd AnnoPRO
 predict.sh protein_A
+=======
+# under root dir of this repo
+bash get_data.sh
 ```
-The result is displayed in the ./protein_A/bp(cc,mf)_result.csv
+4. predict proteins functions
+```bash
+# under root dir of this repo
+bash predict.sh protein_A
+>>>>>>> main
+```
+The result is displayed in the `./protein_A/bp(cc,mf)_result.csv`
 ## Dependencies
 AnnoPRO is tested to work under Python 3.8. and  cuda 11.2.
