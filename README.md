@@ -40,21 +40,14 @@ cp input-protein.dat out-protein.dat protein_A
 ```
 3. get database
 ```bash
+cd ../AnnoPRO
+../get_data.sh
+```
+4. predict proteins functions
+```bash
 cd ../
-./AnnoPRO/get_data.sh
-```
-4. predict proteins functions
-```bash
-cd AnnoPRO
 predict.sh protein_A
-=======
-# under root dir of this repo
-bash get_data.sh
-```
-4. predict proteins functions
-```bash
-# under root dir of this repo
-bash predict.sh protein_A
+
 ```
 The result is displayed in the `./protein_A/bp(cc,mf)_result.csv`
 ## Dependencies
