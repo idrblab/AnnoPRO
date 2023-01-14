@@ -22,7 +22,7 @@ pip install -r requirements.txt
 unrar x profeat-new-version.rar
 cd profeat-new-version
 gfortran pro-des-35.f -o profeat
-cp ./AnnoPRO/input-param.data ./AnnoPRO/profeat-new-version
+cp ../input-param.data input-param.data
 ```
 The Profeat software source code uses Fortran language. It requires a related compilation environment (gcc) to run normally.<br /> 
 2. generate proteins features <br />
@@ -36,7 +36,7 @@ cp input-protein.dat out-protein.dat protein_A
 ```
 3. get database
 ```bash
-cd ./
+cd ../
 ./AnnoPRO/get_data.sh
 ```
 4. predict proteins functions
