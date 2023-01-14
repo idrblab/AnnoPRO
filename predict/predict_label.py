@@ -12,11 +12,13 @@ import math
 import pickle
 from collections import defaultdict
 from tqdm import tqdm
-sys.path.insert(0,'/home/zhengly/PFmap/PFmap/data_procession')
+sys.path.insert(1,'../PFmap/data_procession')
 from utils import Ontology
 
-sys.path.insert(0,'/home/zhengly/PFmap/PFmap')
+sys.path.insert(1,'../PFmap')
 from focal_loss import BinaryFocalLoss
+
+os.chdir(sys.path[0])
 
 class DFGenerator(Sequence):
     def __init__(self, df, terms_dict, nb_classes, batch_size):
@@ -70,9 +72,9 @@ class DFGenerator(Sequence):
             return self.next()
 
 def diamond_score(diamond_scores_file, label, data_path,term_path):
-    with open("/home/zhengly/PFmap/PFmap/data/go.pkl", 'rb') as file:
+    with open("../PFmap/data/go.pkl", 'rb') as file:
         go = pickle.loads(file.read())
-    train_df = pd.read_pickle("/home/zhengly/PFmap/PFmap/data/cafa_train.pkl")
+    train_df = pd.read_pickle("../PFmap/data/cafa_train.pkl")
     test_df = pd.read_pickle(data_path)
     annotations = train_df['Prop_annotations'].values
     annotations = list(map(lambda x: set(x), annotations))
@@ -147,7 +149,7 @@ def init_evaluate(model_file, data_path, term_path, diamond=True, data_size=8000
     if len(data_df) > data_size:
         data_df = data_df.sample(n=data_size)
     data_df.index=range(len(data_df))
-    model = load_model(f'/home/zhengly/PFmap/PFmap/model_param/{model_file}.h5',custom_objects={"focus_loss":BinaryFocalLoss})
+    model = load_model(f'../PFmap/model_parm/{model_file}.h5',custom_objects={"focus_loss":BinaryFocalLoss})
     proteins=data_df["Proteins"]
     terms = terms_df['terms'].values.flatten()
     terms_dict = {v: i for i, v in enumerate(terms)}
