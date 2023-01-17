@@ -16,10 +16,11 @@ setup(
     },
     ext_modules = [Extension(
         name="annopro.data_procession._libprofeat",
-        sources=[f"{PACKAGE_DIR}/annopro/data_procession/libprofeat.f"],
+        sources=[f"{PACKAGE_DIR}/annopro/data_procession/_libprofeat.f"],
         extra_f77_compile_args=[
             "-fallow-argument-mismatch",
             "-w"]
     )],
-    python_requires=">=3.7"
+    python_requires=">=3.7",
+    entry_points=dict(console_scripts=["annopro = annopro:console_main"])
 )
