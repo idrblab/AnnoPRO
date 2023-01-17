@@ -5,9 +5,8 @@ import pandas as pd
 import numpy as np
 from xml.etree import ElementTree as ET
 import math
-import os, sys
-
-os.chdir(sys.path[0])
+import os
+import sys
 
 BIOLOGICAL_PROCESS = 'GO:0008150'
 MOLECULAR_FUNCTION = 'GO:0003674'
@@ -32,8 +31,10 @@ CAFA_TARGETS = set([
     '287', '3702', '4577', '6239', '7227', '7955', '9606', '9823', '10090',
     '10116', '44689', '83333', '99287', '226900', '243273', '284812', '559292'])
 
+
 def is_cafa_target(org):
     return org in CAFA_TARGETS
+
 
 def is_exp_code(code):
     return code in EXP_CODES
@@ -66,7 +67,7 @@ class Ontology(object):
                 min_n = min([cnt[x] for x in parents])
 
             self.ic[go_id] = math.log(min_n / n, 2)
-    
+
     def get_ic(self, go_id):
         if self.ic is None:
             raise Exception('Not yet calculated')
@@ -133,7 +134,6 @@ class Ontology(object):
                     ont[p_id]['children'].add(term_id)
         return ont
 
-
     def get_anchestors(self, term_id):
         if term_id not in self.ont:
             return set()
@@ -149,7 +149,6 @@ class Ontology(object):
                         q.append(parent_id)
         return term_set
 
-
     def get_parents(self, term_id):
         if term_id not in self.ont:
             return set()
@@ -158,7 +157,6 @@ class Ontology(object):
             if parent_id in self.ont:
                 term_set.add(parent_id)
         return term_set
-
 
     def get_namespace_terms(self, namespace):
         terms = set()
@@ -169,7 +167,7 @@ class Ontology(object):
 
     def get_namespace(self, term_id):
         return self.ont[term_id]['namespace']
-    
+
     def get_term_set(self, term_id):
         if term_id not in self.ont:
             return set()
@@ -183,6 +181,7 @@ class Ontology(object):
                 for ch_id in self.ont[t_id]['children']:
                     q.append(ch_id)
         return term_set
+
 
 def read_fasta(filename):
     seqs = list()
@@ -218,7 +217,8 @@ class DFGenerator(Sequence):
         return np.ceil(len(self.df) / float(self.batch_size)).astype(np.int32)
 
     def __getitem__(self, idx):
-        batch_index = np.arange(idx * self.batch_size, min(self.size, (idx + 1) * self.batch_size))
+        batch_index = np.arange(idx * self.batch_size,
+                                min(self.size, (idx + 1) * self.batch_size))
         df = self.df.iloc[batch_index]
         labels = np.zeros((len(df), self.nb_classes), dtype=np.int32)
         feature_data = []

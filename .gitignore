@@ -129,5 +129,7 @@ dmypy.json
 .pyre/
 
 # Ignore data and model params
-PFmap/data/*
-PFmap/model_param/*
+annopro/data/*
+annopro/model_param/*
+
+*.pyc

@@ -1,12 +1,10 @@
-from consine_distances import load_data,MinMaxScaleClip
+from annopro.data_procession.consine_distances import load_data,MinMaxScaleClip
 import pandas as pd
 import pickle
 import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
 from tqdm import tqdm
 import os, sys
-
-os.chdir(sys.path[0])
 
 class Data_process():
 

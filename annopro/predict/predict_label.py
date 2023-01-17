@@ -12,30 +12,9 @@ import math
 import pickle
 from collections import defaultdict
 from tqdm import tqdm
-sys.path.insert(0,'/home/zhengly/PFmap/PFmap/data_procession')
-from utils import Ontology
+from annopro.data_procession.utils import Ontology
+from annopro.focal_loss import BinaryFocalLoss
 
-sys.path.insert(0,'/home/zhengly/PFmap/PFmap')
-from focal_loss import BinaryFocalLoss
-
-import argparse
-
-
-parser = argparse.ArgumentParser(description='Arguments for main.py')
-parser.add_argument('--file_path', default=None, type=str)
-parser.add_argument('--gpu', action='store_true', default=True)
-parser.add_argument('--used_gpu', default="0", type=str)
-args = parser.parse_args()
-
-
-case_file=os.path.join(args.file_path,"case.txt")
-protein_file=os.path.join(args.file_path,"protein.pkl")
-
-
-if args.file_path == None:
-    raise ValueError("Must provide the input fasta sequences.")
-if args.gpu == True:
-    os.environ["CUDA_VISIBLE_DEVICES"] = args.used_gpu
 
 class DFGenerator(Sequence):
     def __init__(self, df, terms_dict, nb_classes, batch_size):
@@ -50,7 +29,8 @@ class DFGenerator(Sequence):
         return np.ceil(len(self.df) / float(self.batch_size)).astype(np.int32)
 
     def __getitem__(self, idx):
-        batch_index = np.arange(idx * self.batch_size, min(self.size, (idx + 1) * self.batch_size))
+        batch_index = np.arange(idx * self.batch_size,
+                                min(self.size, (idx + 1) * self.batch_size))
         df = self.df.iloc[batch_index]
         labels = np.zeros((len(df), self.nb_classes), dtype=np.int32)
         feature_data = []
@@ -88,19 +68,19 @@ class DFGenerator(Sequence):
             self.reset()
             return self.next()
 
-def diamond_score(diamond_scores_file, label, data_path,term_path):
-    with open("/home/zhengly/promap/data/CAFA/go.pkl", 'rb') as file:
+
+def diamond_score(diamond_scores_file, label, data_path, term_path):
+    with open("../PFmap/data/go.pkl", 'rb') as file:
         go = pickle.loads(file.read())
-    train_df = pd.read_pickle("/home/zhengly/PFmap/PFmap/data/cafa_train.pkl")
+    train_df = pd.read_pickle("../PFmap/data/cafa_train.pkl")
     test_df = pd.read_pickle(data_path)
     annotations = train_df['Prop_annotations'].values
     annotations = list(map(lambda x: set(x), annotations))
 
-    
     prot_index = {}
     for i, row in enumerate(train_df.itertuples()):
         prot_index[row.Proteins] = i
-    
+
     diamond_scores = {}
     with open(diamond_scores_file) as f:
         for line in f:
@@ -136,9 +116,11 @@ def diamond_score(diamond_scores_file, label, data_path,term_path):
     terms = pd.read_pickle(term_path)
     terms = terms['terms'].values.flatten()
     terms_dict = {v: i for i, v in enumerate(terms)}
-    NAMESPACES = {'cc': 'cellular_component', 'mf': 'molecular_function', 'bp': 'biological_process'}
-    alphas = {NAMESPACES['mf']: 0.55, NAMESPACES['bp']: 0.6, NAMESPACES['cc']: 0.4}     
-    
+    NAMESPACES = {'cc': 'cellular_component',
+                  'mf': 'molecular_function', 'bp': 'biological_process'}
+    alphas = {NAMESPACES['mf']: 0.55,
+              NAMESPACES['bp']: 0.6, NAMESPACES['cc']: 0.4}
+
     for i in range(0, len(label)):
         annots_dict = blast_preds[i].copy()
         for go_id in annots_dict:
@@ -147,14 +129,16 @@ def diamond_score(diamond_scores_file, label, data_path,term_path):
             go_id = terms[j]
             label[i, j] = label[i, j]*(1 - alphas[go.get_namespace(go_id)])
             if go_id in annots_dict:
-                label[i, j] =  label[i, j] + annots_dict[go_id]
-    return label        
+                label[i, j] = label[i, j] + annots_dict[go_id]
+    return label
+
 
 def plot_curve(history):
     plt.figure()
     x_range = range(0, len(history.history['loss']))
     plt.plot(x_range, history.history['loss'], 'bo', label='Training loss')
-    plt.plot(x_range, history.history['val_loss'], 'b', label='Validation loss')
+    plt.plot(x_range, history.history['val_loss'],
+             'b', label='Validation loss')
     plt.title('Training and validation loss')
     plt.legend()
 
@@ -162,13 +146,13 @@ def plot_curve(history):
 def init_evaluate(model_file, data_path, term_path, diamond=True, data_size=8000, batch_size=16):
     with open(term_path, 'rb') as file:
         terms_df = pickle.load(file)
-    with open(data_path, 'rb') as file:
-        data_df = pickle.load(file)
+    data_df = pd.read_pickle(data_path)
     if len(data_df) > data_size:
         data_df = data_df.sample(n=data_size)
-    data_df.index=range(len(data_df))
-    model = load_model(f'/home/zhengly/PFmap/PFmap/model_param/{model_file}.h5',custom_objects={"focus_loss":BinaryFocalLoss})
-    proteins=data_df["Proteins"]
+    data_df.index = range(len(data_df))
+    model = load_model(
+        f'../PFmap/model_parm/{model_file}.h5', custom_objects={"focus_loss": BinaryFocalLoss})
+    proteins = data_df["Proteins"]
     terms = terms_df['terms'].values.flatten()
     terms_dict = {v: i for i, v in enumerate(terms)}
     nb_classes = len(terms)
@@ -176,26 +160,22 @@ def init_evaluate(model_file, data_path, term_path, diamond=True, data_size=8000
     data_steps = int(math.ceil(len(data_df) / batch_size))
     preds = model.predict(data_generator, steps=data_steps)
     if diamond:
-        preds=diamond_score(case_file,preds,data_path,term_path=term_path)
+        preds = diamond_score(case_file, preds, data_path, term_path=term_path)
     # label_di=defaultdict(list)
-    protein=[]
-    go_terms=[]
-    score=[]
+    protein = []
+    go_terms = []
+    score = []
     for i in range(len(preds)):
         for j in range(len(preds[i])):
-            if preds[i][j]>0:
+            if preds[i][j] > 0:
                 protein.append(proteins[i])
                 go_terms.append(terms[j])
                 score.append(preds[i][j])
-    res=[protein, go_terms, score]
-    res=pd.DataFrame(res)
-    res=res.T
-    res.columns=['Proteins', 'GO-terms', 'Scores']
+    res = [protein, go_terms, score]
+    res = pd.DataFrame(res)
+    res = res.T
+    res.columns = ['Proteins', 'GO-terms', 'Scores']
     res.sort_values(by='Scores', axis=0, ascending=False, inplace=True)
-    result_file=os.path.join(args.file_path,f"{model_file}_result.csv")
-    res.to_csv(result_file,sep=',',index=False,header=True)
+    result_file = os.path.join(args.file_path, f"{model_file}_result.csv")
+    res.to_csv(result_file, sep=',', index=False, header=True)
     return res
-
-init_evaluate('mf',protein_file,term_path='/home/zhengly/PFmap/PFmap/data/terms_molecular_function.pkl')
-init_evaluate('bp',protein_file,term_path='/home/zhengly/PFmap/PFmap/data/terms_biological_process.pkl')
-init_evaluate('cc',protein_file,term_path='/home/zhengly/PFmap/PFmap/data/terms_cellular_component.pkl')

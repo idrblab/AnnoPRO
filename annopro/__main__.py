@@ -1,24 +1,32 @@
 # 要求的库与参数
 import os
-import sys
-from pyparsing import alphas
 from tensorflow.keras.utils import Sequence
 import matplotlib.pyplot as plt
 from tensorflow.keras.models import load_model
-import tensorflow as tf
 import numpy as np
 import pandas as pd
 import math
 import pickle
-from collections import defaultdict
-from tqdm import tqdm
-sys.path.insert(1,'../PFmap/data_procession')
-from utils import Ontology
+import annopro.data as data
+import annopro.model_param as model_param
+from annopro.focal_loss import BinaryFocalLoss
+from annopro.data_procession.utils import NAMESPACES
+from importlib import resources
 
-sys.path.insert(1,'../PFmap')
-from focal_loss import BinaryFocalLoss
 
-os.chdir(sys.path[0])
+def main(file_path: str, used_gpu: str = "0", with_diamond: bool = True):
+    case_file = os.path.join(file_path, "case.txt")
+    protein_file = os.path.join(file_path, "protein.pkl")
+    if args.file_path == None:
+        raise ValueError("Must provide the input fasta sequences.")
+    if args.gpu == True:
+        os.environ["CUDA_VISIBLE_DEVICES"] = used_gpu
+    for term_type in NAMESPACES.keys():
+        init_evaluate(term_type=term_type,
+                      data_path=protein_file,
+                      case_file=case_file,
+                      with_diamond=with_diamond)
+
 
 class DFGenerator(Sequence):
     def __init__(self, df, terms_dict, nb_classes, batch_size):
@@ -33,7 +41,8 @@ class DFGenerator(Sequence):
         return np.ceil(len(self.df) / float(self.batch_size)).astype(np.int32)
 
     def __getitem__(self, idx):
-        batch_index = np.arange(idx * self.batch_size, min(self.size, (idx + 1) * self.batch_size))
+        batch_index = np.arange(idx * self.batch_size,
+                                min(self.size, (idx + 1) * self.batch_size))
         df = self.df.iloc[batch_index]
         labels = np.zeros((len(df), self.nb_classes), dtype=np.int32)
         feature_data = []
@@ -71,19 +80,20 @@ class DFGenerator(Sequence):
             self.reset()
             return self.next()
 
-def diamond_score(diamond_scores_file, label, data_path,term_path):
-    with open("../PFmap/data/go.pkl", 'rb') as file:
+
+def diamond_score(diamond_scores_file, label, data_path, term_type):
+    with resources.open_binary(data, "go.pkl") as file:
         go = pickle.loads(file.read())
-    train_df = pd.read_pickle("../PFmap/data/cafa_train.pkl")
+    with resources.open_binary(data, "cafa_train.pkl") as file:
+        train_df = pd.read_pickle(file)
     test_df = pd.read_pickle(data_path)
     annotations = train_df['Prop_annotations'].values
     annotations = list(map(lambda x: set(x), annotations))
 
-    
     prot_index = {}
     for i, row in enumerate(train_df.itertuples()):
         prot_index[row.Proteins] = i
-    
+
     diamond_scores = {}
     with open(diamond_scores_file) as f:
         for line in f:
@@ -116,12 +126,12 @@ def diamond_score(diamond_scores_file, label, data_path,term_path):
             for go_id, score in zip(allgos, sim):
                 annots[go_id] = score
         blast_preds.append(annots)
-    terms = pd.read_pickle(term_path)
+    with resources.open_binary(data, f"terms_{NAMESPACES[term_type]}.pkl") as term_path:
+        terms = pd.read_pickle(term_path)
     terms = terms['terms'].values.flatten()
-    terms_dict = {v: i for i, v in enumerate(terms)}
-    NAMESPACES = {'cc': 'cellular_component', 'mf': 'molecular_function', 'bp': 'biological_process'}
-    alphas = {NAMESPACES['mf']: 0.55, NAMESPACES['bp']: 0.6, NAMESPACES['cc']: 0.4}     
-    
+    alphas = {NAMESPACES['mf']: 0.55,
+              NAMESPACES['bp']: 0.6, NAMESPACES['cc']: 0.4}
+
     for i in range(0, len(label)):
         annots_dict = blast_preds[i].copy()
         for go_id in annots_dict:
@@ -130,50 +140,72 @@ def diamond_score(diamond_scores_file, label, data_path,term_path):
             go_id = terms[j]
             label[i, j] = label[i, j]*(1 - alphas[go.get_namespace(go_id)])
             if go_id in annots_dict:
-                label[i, j] =  label[i, j] + annots_dict[go_id]
-    return label        
+                label[i, j] = label[i, j] + annots_dict[go_id]
+    return label
+
 
 def plot_curve(history):
     plt.figure()
     x_range = range(0, len(history.history['loss']))
     plt.plot(x_range, history.history['loss'], 'bo', label='Training loss')
-    plt.plot(x_range, history.history['val_loss'], 'b', label='Validation loss')
+    plt.plot(x_range, history.history['val_loss'],
+             'b', label='Validation loss')
     plt.title('Training and validation loss')
     plt.legend()
 
 
-def init_evaluate(model_file, data_path, term_path, diamond=True, data_size=8000, batch_size=16):
-    with open(term_path, 'rb') as file:
+def init_evaluate(term_type, data_path, case_file, data_size=8000, batch_size=16,
+                  with_diamond: bool = True):
+    with resources.open_binary(data, f"terms_{NAMESPACES[term_type]}.pkl") as file:
         terms_df = pickle.load(file)
-    data_df=pd.read_pickle(data_path)
+    with open(data_path, 'rb') as file:
+        data_df = pickle.load(file)
     if len(data_df) > data_size:
         data_df = data_df.sample(n=data_size)
-    data_df.index=range(len(data_df))
-    model = load_model(f'../PFmap/model_parm/{model_file}.h5',custom_objects={"focus_loss":BinaryFocalLoss})
-    proteins=data_df["Proteins"]
+    data_df.index = range(len(data_df))
+    with resources.path(model_param, f"{term_type}.h5") as model_file_path:
+        model = load_model(
+            model_file_path.absolute(),
+            custom_objects={"focus_loss": BinaryFocalLoss})
+    proteins = data_df["Proteins"]
     terms = terms_df['terms'].values.flatten()
     terms_dict = {v: i for i, v in enumerate(terms)}
     nb_classes = len(terms)
     data_generator = DFGenerator(data_df, terms_dict, nb_classes, batch_size)
     data_steps = int(math.ceil(len(data_df) / batch_size))
     preds = model.predict(data_generator, steps=data_steps)
-    if diamond:
-        preds=diamond_score(case_file,preds,data_path,term_path=term_path)
+    if with_diamond:
+        preds = diamond_score(case_file, preds, data_path, term_type=term_type)
     # label_di=defaultdict(list)
-    protein=[]
-    go_terms=[]
-    score=[]
+    protein = []
+    go_terms = []
+    score = []
     for i in range(len(preds)):
         for j in range(len(preds[i])):
-            if preds[i][j]>0:
+            if preds[i][j] > 0:
                 protein.append(proteins[i])
                 go_terms.append(terms[j])
                 score.append(preds[i][j])
-    res=[protein, go_terms, score]
-    res=pd.DataFrame(res)
-    res=res.T
-    res.columns=['Proteins', 'GO-terms', 'Scores']
+    res = [protein, go_terms, score]
+    res = pd.DataFrame(res)
+    res = res.T
+    res.columns = ['Proteins', 'GO-terms', 'Scores']
     res.sort_values(by='Scores', axis=0, ascending=False, inplace=True)
-    result_file=os.path.join(args.file_path,f"{model_file}_result.csv")
-    res.to_csv(result_file,sep=',',index=False,header=True)
+    result_file = os.path.join(args.file_path, f"{term_type}_result.csv")
+    res.to_csv(result_file, sep=',', index=False, header=True)
     return res
+
+
+if __name__ == "__main__":
+    import argparse
+    parser = argparse.ArgumentParser(description='Arguments for main.py')
+    parser.add_argument('--file_path', default=None, type=str)
+    # parser.add_argument('--gpu', action='store_true', default=True)
+    parser.add_argument('--used_gpu', default="0", type=str)
+    parser.add_argument('--with_diamond', action='store_true', default=True)
+    args = parser.parse_args()
+    main(
+        file_path=args.file_path,
+        used_gpu=args.used_gpu,
+        with_diamond=args.with_diamond
+    )
