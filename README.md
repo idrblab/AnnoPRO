@@ -27,6 +27,8 @@ sudo apt install gcc g++ gfortran
 
 2. install annopro
 
+You can install it directly by `pip install annopro` or install from source code as following steps.
+But you should install numpy first if you install it from source code because we need `numpy.f2py` to help us build fortran extension submodule.
 ```bash
 git clone https://github.com/idrblab/AnnoPRO.git
 cd AnnoPRO
@@ -37,11 +39,23 @@ python setup.py install
 ```
 
 ## Usage
+- Use it as a terminal command. For all parameters, type `annopro -h`.
+```bash
+annopro test_proteins.fasta -o output
+```
+- Use it as a python executable package
 
+```bash
+python -m annopro test_proteins.fasta -o output
 ```
-annopro input-protein.fasta -o output
+
+- Use it as a library to integrated with your project.
+```python
+from annopro import main
+main("test_proteins.fasta", "output")
 ```
-The result is displayed in the `./output/bp(cc,mf)_result.csv`
+
+The result is displayed in the `./output/bp(cc,mf)_result.csv`.
 
 ## Note
 AnnoPRO is tested to work under Python 3.8. and  cuda 11.2.
