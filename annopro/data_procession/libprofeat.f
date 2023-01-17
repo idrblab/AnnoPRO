@@ -524,7 +524,7 @@ C
 C    output on unit 9:output-des.dat
 C
 C      write(9,10001) name
-      write(9,*) name
+      write(9,*) ">" // name
       write(9,*) nv
       nn=0
 10000 nn=nn+1
