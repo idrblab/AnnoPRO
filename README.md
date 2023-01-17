@@ -16,39 +16,30 @@
 * Decoding layers: LSTMs
 ![image](https://user-images.githubusercontent.com/76670356/204524869-31f558f0-0298-48c5-b4d2-3d5d087a2def.png)
 ## Installation
-1. install gcc and  Profeat firstly.
+
 ```bash
 git clone https://github.com/idrblab/AnnoPRO.git
 cd AnnoPRO
-conda create -n AnnoPRO python=3.8
-conda activate AnnoPRO
+conda create -n annopro python=3.8
+conda activate annopro
 pip install -r requirements.txt
-unrar x profeat-new-version.rar
-cd profeat-new-version
-gfortran pro-des-35.f -o profeat
-cp ../input-param.data input-param.data
+python setup.py install
 ```
-The Profeat software source code uses Fortran language. It requires a related compilation environment (gcc) to run normally.<br /> 
-2. generate proteins features <br />
-upload your protein fasta file into the input-protein.dat
+**Warnings** dependency `lapjv` requires `g++` or other Cpp compiler, and annopro contains fortran extensional module and require `gfortran` or other fortran compiler. Please make sure them installed before installing annopro.
+
 ```bash
-profeat
+sudo apt install gcc g++ gfortran
 ```
-Then create a new file folder such as protein_A
-```bash
-cp input-protein.dat out-protein.dat protein_A
-```
-3. get database
-```bash
-cd ../AnnoPRO
-../get_data.sh
-```
-4. predict proteins functions
-```bash
-cd ../
-predict.sh protein_A
+
+## Usage
 
 ```
-The result is displayed in the `./protein_A/bp(cc,mf)_result.csv`
-## Dependencies
+annopro input-protein.fasta -o output
+```
+The result is displayed in the `./output/bp(cc,mf)_result.csv`
+
+## Note
 AnnoPRO is tested to work under Python 3.8. and  cuda 11.2.
+
+## Contact
+If any questions, please create an [issue](https://github.com/idrblab/AnnoPRO/issues/new/choose) on this repo, we will deal with it as soon as possible.
