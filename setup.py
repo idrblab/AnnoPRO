@@ -1,10 +1,12 @@
+from pathlib import Path
 from numpy.distutils.core import Extension
 from numpy.distutils.core import setup
 from setuptools import find_packages
+
 PACKAGE_DIR = "."
 setup(
     package_dir = {"": PACKAGE_DIR},
-    install_requires = ["numpy"],
+    install_requires = Path("requirements.txt").read_text().split("\n"),
     packages = find_packages(where=PACKAGE_DIR),
     include_package_data=True,
     package_data = {
@@ -18,5 +20,6 @@ setup(
         extra_f77_compile_args=[
             "-fallow-argument-mismatch",
             "-w"]
-    )]
+    )],
+    python_requires=">=3.7"
 )
