@@ -9,3 +9,4 @@ tensorflow>=2.5.0
 threadpoolctl>=3.1.0
 tqdm>=4.47.0
 umap-learn>=0.3.10
+fasta>=2.2.13

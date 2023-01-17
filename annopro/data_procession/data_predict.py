@@ -1,11 +1,13 @@
 from annopro.data_procession.consine_distances import load_data, MinMaxScaleClip
 import pandas as pd
 import pickle
+
 import numpy as np
 from importlib import resources
 from sklearn.metrics.pairwise import cosine_similarity
 from annopro.data_procession.utils import Ontology
-from annopro.data_procession.erro import feature_to_csv
+from annopro.data_procession.error import profeat_to_df
+from fasta import FASTA
 
 
 DATA_PACKAGE = "annopro.data"
@@ -16,7 +18,7 @@ class Data_process():
     def __init__(
             self,
             protein_file,
-            split_file,
+            proteins_fasta_file,
             save_file,
             num,
             grid_file="data_grid.pkl",
@@ -30,7 +32,7 @@ class Data_process():
         grid_file，assess_file是使用的map的位置文件
         '''
         self.protein_file = protein_file
-        self.split_file = split_file
+        self.split_file = proteins_fasta_file
         self.save_file = save_file
         self.grid_file = grid_file
         self.assess_file = assess_file
@@ -39,7 +41,7 @@ class Data_process():
         self.__data__()
 
     def __data__(self):
-        proteins_f = feature_to_csv(self.protein_file)
+        proteins_f = profeat_to_df(self.protein_file)
         proteins_f.dropna(axis=0, inplace=True)
         feature_data = proteins_f.iloc[:, :self.num]
         with resources.open_text(DATA_PACKAGE, "cafa4_del.csv") as cafa4_del:
@@ -62,18 +64,7 @@ class Data_process():
         self.go = Ontology()
 
     def calculate_feature(self, row_num, size):
-        train = pd.read_table(self.split_file, header=None)
-        protein_t = []
-        sequence_t = []
-        # for i in train[train.index%2==0][0]:
-        #     protein_t.append(i.strip(">"))
-        # for j in train[train.index%2==1][0]:
-        #     sequence_t.append(j)
-        for i in train[0]:
-            if "|" in i:
-                protein_t.append(i.split("|")[1].strip("\n"+" "))
-            else:
-                sequence_t.append(i.strip("\n"))
+        protein_seqs = FASTA(self.split_file).sequences
         class_labels = ['Composition', 'Autocorrelation', 'Physiochemical', 'Interaction',
                         'Quasi-sequence-order descriptors', 'PAAC for amino acid index set', 'Amphiphilic Pseudo amino acid composition']
         protein_all = []
@@ -90,14 +81,15 @@ class Data_process():
             1)-cosine_similarity(result, self.prosim_map)
         # row, col = np.diag_indices_from(consine_similarity)
         # consine_similarity[row,col]=0
-        for i in range(len(proteins)):
-            if proteins[i] in protein_t:
-                index_p = protein_t.index(proteins[i])
+        print(proteins)
+        print(protein_seqs)
+        for i, protein in enumerate(proteins):
+            if protein in protein_seqs:
                 col_list = np.zeros(size)
                 row = 0
                 col = 0
-                protein_all.append(proteins[i])
-                sequences_all.append(sequence_t[index_p])
+                protein_all.append(protein)
+                sequences_all.append(str(protein_seqs[protein].seq))
                 prosim_all.append(consine_similarity[i])
                 # 构建promap特征
                 for j in range(len(data_grid['x'])):
@@ -114,6 +106,4 @@ class Data_process():
         data_t = data_t.T
         data_t.columns = ['Proteins', 'Sequence',
                           'Promap_feature', 'Protein_similary']
-        f = open(self.save_file, 'wb')
-        pickle.dump(data_t, f)
-        f.close()
+        data_t.to_pickle(self.save_file)
