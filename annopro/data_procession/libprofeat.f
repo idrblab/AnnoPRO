@@ -5,11 +5,9 @@ C       (2) protein-protein sequence pairs
 C       (3) ligands
 C       (4) protein sequence-ligand
 C****************************************************************
-C     input.dat: one or more protein sequences in Fasta format
+C     input-protein.fasta: one or more protein sequences in Fasta format
 C*************************************************************
 C     input-ligand.sdf: one or more ligands in SDF format
-      ! call main('input-protein.fasta')
-      ! end
       subroutine run(protein_fasta_file, 
      & output_dir, output_dir_len,
      & config_dir, config_dir_len)
