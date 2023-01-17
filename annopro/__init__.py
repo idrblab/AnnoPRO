@@ -12,6 +12,8 @@ from annopro.focal_loss import BinaryFocalLoss
 from annopro.data_procession.utils import NAMESPACES
 from importlib import resources
 
+__version__ = "0.0.1"
+
 
 def main(file_path: str, used_gpu: str = None, with_diamond: bool = True):
     case_file = os.path.join(file_path, "case.txt")
