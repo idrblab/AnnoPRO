@@ -16,6 +16,16 @@
 * Decoding layers: LSTMs
 ![image](https://user-images.githubusercontent.com/76670356/204524869-31f558f0-0298-48c5-b4d2-3d5d087a2def.png)
 ## Installation
+1. install diamond and compilers
+
+dependency `lapjv` requires `g++` or other Cpp compiler, and annopro contains fortran extensional module and require `gfortran` or other fortran compiler. `diamond` will be invoked by annopro for blast. Here is an example of installing them on Ubuntu.
+
+```bash
+sudo apt install diamond-aligner
+sudo apt install gcc g++ gfortran
+```
+
+2. install annopro
 
 ```bash
 git clone https://github.com/idrblab/AnnoPRO.git
@@ -24,11 +34,6 @@ conda create -n annopro python=3.8
 conda activate annopro
 pip install -r requirements.txt
 python setup.py install
-```
-**Warnings** dependency `lapjv` requires `g++` or other Cpp compiler, and annopro contains fortran extensional module and require `gfortran` or other fortran compiler. Please make sure them installed before installing annopro.
-
-```bash
-sudo apt install gcc g++ gfortran
 ```
 
 ## Usage
