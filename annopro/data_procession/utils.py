@@ -1,12 +1,9 @@
 from collections import deque, Counter
-import warnings
 from tensorflow.keras.utils import Sequence
-import pandas as pd
 import numpy as np
-from xml.etree import ElementTree as ET
 import math
-import os
-import sys
+from annopro import data
+from importlib import resources
 
 BIOLOGICAL_PROCESS = 'GO:0008150'
 MOLECULAR_FUNCTION = 'GO:0003674'
@@ -42,8 +39,8 @@ def is_exp_code(code):
 
 class Ontology(object):
 
-    def __init__(self, filename='../data/go.txt', with_rels=False):
-        self.ont = self.load(filename, with_rels)
+    def __init__(self, with_rels=False):
+        self.ont = self.load(with_rels)
         self.ic = None
 
     def has_term(self, term_id):
@@ -75,10 +72,10 @@ class Ontology(object):
             return 0.0
         return self.ic[go_id]
 
-    def load(self, filename, with_rels):
+    def load(self, with_rels):
         ont = dict()
         obj = None
-        with open(filename, 'r') as f:
+        with resources.open_text(data, "go.txt") as f:
             for line in f:
                 line = line.strip()
                 if not line:
