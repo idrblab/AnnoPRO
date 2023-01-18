@@ -1,5 +1,15 @@
 __version__ = "0.1rc1"
 
+import sys, os
+
+if sys.platform == "win32":
+    # numpy.distutils.command.build_ext.build_ext 
+    # will add dynamic library to the root package's .libs
+    # because they think it's a good idea to share the same .libs
+    # so we have to add it to the path
+    # here is just for profeat fortran extension module
+    shared_libs = os.path.join(os.path.dirname(__file__), ".libs")
+    os.add_dll_directory(shared_libs)
 
 def console_main():
     import argparse

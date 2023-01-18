@@ -2,11 +2,17 @@ from pathlib import Path
 from numpy.distutils.core import Extension
 from numpy.distutils.core import setup
 from setuptools import find_packages
+import sys
 
 PACKAGE_DIR = "."
+install_requires = Path("requirements.txt").read_text().split("\n")
+
+if sys.platform == "linux":
+    install_requires = ["fasta" if r.startswith("fasta") else r for r in install_requires]
+
 setup(
     package_dir = {"": PACKAGE_DIR},
-    install_requires = Path("requirements.txt").read_text().split("\n"),
+    install_requires = install_requires,
     packages = find_packages(where=PACKAGE_DIR),
     include_package_data=True,
     package_data = {
@@ -21,6 +27,6 @@ setup(
             "-fallow-argument-mismatch",
             "-w"]
     )],
-    python_requires=">=3.7",
+    python_requires=">=3.8",
     entry_points=dict(console_scripts=["annopro = annopro:console_main"])
 )
