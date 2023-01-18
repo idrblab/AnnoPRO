@@ -1,9 +1,11 @@
 from collections import deque, Counter
 from tensorflow.keras.utils import Sequence
 import numpy as np
+import pandas as pd
 import math
 from annopro import data
 from importlib import resources
+from typing import Union
 
 BIOLOGICAL_PROCESS = 'GO:0008150'
 MOLECULAR_FUNCTION = 'GO:0003674'
@@ -258,3 +260,15 @@ class DFGenerator(Sequence):
         else:
             self.reset()
             return self.next()
+
+
+def load_data(file:str, num:int):
+    data = pd.read_csv(file, header=None)
+    data.dropna(axis=0, inplace=True)
+    data_noprotein = data.iloc[:, 1:num]
+    return data_noprotein
+
+
+def MinMaxScaleClip(data: Union[pd.DataFrame, np.ndarray]) -> Union[pd.DataFrame, np.ndarray]:
+    data_standard = (data - data.min()) / ((data.max() - data.min()) + 1e-8)
+    return data_standard
