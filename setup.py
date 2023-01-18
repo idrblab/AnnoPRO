@@ -2,13 +2,9 @@ from pathlib import Path
 from numpy.distutils.core import Extension
 from numpy.distutils.core import setup
 from setuptools import find_packages
-import sys
 
 PACKAGE_DIR = "."
 install_requires = Path("requirements.txt").read_text().split("\n")
-
-if sys.platform == "linux":
-    install_requires = ["fasta" if r.startswith("fasta") else r for r in install_requires]
 
 setup(
     package_dir = {"": PACKAGE_DIR},
