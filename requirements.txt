@@ -9,4 +9,4 @@ tensorflow>=2.5.0,<=2.6.5
 threadpoolctl>=3.1.0
 tqdm>=4.47.0
 umap-learn>=0.3.10
-fasta @ git+https://gitlab.com/GCS-ZHN/fasta.git@6aaa8eea8b9581023cf9f20ebb316940319328f9
+fasta>=2.3.2
