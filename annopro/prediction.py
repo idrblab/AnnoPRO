@@ -14,11 +14,10 @@ from importlib import resources
 
 
 def predict(output_dir: str, promap_features_file: str,
-            used_gpu: str = None, diamond_scores_file: str = None):
+            used_gpu: str = "-1", diamond_scores_file: str = None):
     if output_dir == None:
         raise ValueError("Must provide the input fasta sequences.")
-    if used_gpu:
-        os.environ["CUDA_VISIBLE_DEVICES"] = used_gpu
+    os.environ["CUDA_VISIBLE_DEVICES"] = used_gpu
     for term_type in NAMESPACES.keys():
         init_evaluate(term_type=term_type,
                       promap_features_file=promap_features_file,
