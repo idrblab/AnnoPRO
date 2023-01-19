@@ -17,7 +17,7 @@ def console_main():
     parser.add_argument("fasta_file", help="The protein sequences file")
     parser.add_argument('--output', "-o", default=None,
                         type=str, help="Output directory")
-    parser.add_argument('--used_gpu', default=None, type=str,
+    parser.add_argument('--used_gpu', default="-1", type=str,
                         help="GPU device selected, default is CPU")
     parser.add_argument('--disable_diamond',
                         action='store_true', default=False,
