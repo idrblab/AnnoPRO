@@ -24,7 +24,11 @@ dependency `lapjv` requires `g++` or other Cpp compiler, and annopro contains fo
 sudo apt install diamond-aligner
 sudo apt install gcc g++ gfortran
 # or you can install by conda in your virtual env
-conda install -c conda-forge gfortran_linux-64
+# command name is like 
+# gcc: x86_64-conda_cos6-linux-gnu-cc
+# g++: x86_64-conda_cos6-linux-gnu-c++
+# gfortran: x86_64-conda_cos6-linux-gnu-gfortran
+conda install gcc_linux-64 gxx_linux-64 gfortran_linux-64
 ```
 
 2. install annopro
@@ -66,6 +70,12 @@ AnnoPRO is tested to work under Python 3.8. and  cuda 11.2.
 1. pip is looking at multiple versions of XXX to determine which version is compatible with other requirements. this could take a while.
 
 Your pip is latest, back to old version such as 20.2, or just add `--use-deprecated=legacy-resolver` param.
+
+2. Argument mismatch when building source code.
+
+Because your gfortran is latest and imcompatible,
+edit setup.py and uncomment `-fallow-argument-mismatch` or 
+just use a earlier version of gfortran such as 4.8.5, 8.4
 
 ## Contact
 If any questions, please create an [issue](https://github.com/idrblab/AnnoPRO/issues/new/choose) on this repo, we will deal with it as soon as possible.
