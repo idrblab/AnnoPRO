@@ -1,13 +1,11 @@
 from collections import deque, Counter
-import warnings
 from tensorflow.keras.utils import Sequence
-import pandas as pd
 import numpy as np
-from xml.etree import ElementTree as ET
+import pandas as pd
 import math
-import os, sys
-
-os.chdir(sys.path[0])
+from annopro import data
+from importlib import resources
+from typing import Union
 
 BIOLOGICAL_PROCESS = 'GO:0008150'
 MOLECULAR_FUNCTION = 'GO:0003674'
@@ -32,8 +30,10 @@ CAFA_TARGETS = set([
     '287', '3702', '4577', '6239', '7227', '7955', '9606', '9823', '10090',
     '10116', '44689', '83333', '99287', '226900', '243273', '284812', '559292'])
 
+
 def is_cafa_target(org):
     return org in CAFA_TARGETS
+
 
 def is_exp_code(code):
     return code in EXP_CODES
@@ -41,8 +41,8 @@ def is_exp_code(code):
 
 class Ontology(object):
 
-    def __init__(self, filename='../data/go.txt', with_rels=False):
-        self.ont = self.load(filename, with_rels)
+    def __init__(self, with_rels=False):
+        self.ont = self.load(with_rels)
         self.ic = None
 
     def has_term(self, term_id):
@@ -66,7 +66,7 @@ class Ontology(object):
                 min_n = min([cnt[x] for x in parents])
 
             self.ic[go_id] = math.log(min_n / n, 2)
-    
+
     def get_ic(self, go_id):
         if self.ic is None:
             raise Exception('Not yet calculated')
@@ -74,10 +74,10 @@ class Ontology(object):
             return 0.0
         return self.ic[go_id]
 
-    def load(self, filename, with_rels):
+    def load(self, with_rels):
         ont = dict()
         obj = None
-        with open(filename, 'r') as f:
+        with resources.open_text(data, "go.txt") as f:
             for line in f:
                 line = line.strip()
                 if not line:
@@ -133,7 +133,6 @@ class Ontology(object):
                     ont[p_id]['children'].add(term_id)
         return ont
 
-
     def get_anchestors(self, term_id):
         if term_id not in self.ont:
             return set()
@@ -149,7 +148,6 @@ class Ontology(object):
                         q.append(parent_id)
         return term_set
 
-
     def get_parents(self, term_id):
         if term_id not in self.ont:
             return set()
@@ -158,7 +156,6 @@ class Ontology(object):
             if parent_id in self.ont:
                 term_set.add(parent_id)
         return term_set
-
 
     def get_namespace_terms(self, namespace):
         terms = set()
@@ -169,7 +166,7 @@ class Ontology(object):
 
     def get_namespace(self, term_id):
         return self.ont[term_id]['namespace']
-    
+
     def get_term_set(self, term_id):
         if term_id not in self.ont:
             return set()
@@ -183,6 +180,7 @@ class Ontology(object):
                 for ch_id in self.ont[t_id]['children']:
                     q.append(ch_id)
         return term_set
+
 
 def read_fasta(filename):
     seqs = list()
@@ -218,7 +216,8 @@ class DFGenerator(Sequence):
         return np.ceil(len(self.df) / float(self.batch_size)).astype(np.int32)
 
     def __getitem__(self, idx):
-        batch_index = np.arange(idx * self.batch_size, min(self.size, (idx + 1) * self.batch_size))
+        batch_index = np.arange(idx * self.batch_size,
+                                min(self.size, (idx + 1) * self.batch_size))
         df = self.df.iloc[batch_index]
         labels = np.zeros((len(df), self.nb_classes), dtype=np.int32)
         feature_data = []
@@ -261,3 +260,15 @@ class DFGenerator(Sequence):
         else:
             self.reset()
             return self.next()
+
+
+def load_data(file:str, num:int):
+    data = pd.read_csv(file, header=None)
+    data.dropna(axis=0, inplace=True)
+    data_noprotein = data.iloc[:, 1:num]
+    return data_noprotein
+
+
+def MinMaxScaleClip(data: Union[pd.DataFrame, np.ndarray]) -> Union[pd.DataFrame, np.ndarray]:
+    data_standard = (data - data.min()) / ((data.max() - data.min()) + 1e-8)
+    return data_standard

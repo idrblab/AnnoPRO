@@ -1,41 +1,29 @@
-# 要求的库与参数
 import os
-import sys
-from pyparsing import alphas
 from tensorflow.keras.utils import Sequence
 import matplotlib.pyplot as plt
 from tensorflow.keras.models import load_model
-import tensorflow as tf
 import numpy as np
 import pandas as pd
 import math
 import pickle
-from collections import defaultdict
-from tqdm import tqdm
-sys.path.insert(0,'/home/zhengly/PFmap/PFmap/data_procession')
-from utils import Ontology
-
-sys.path.insert(0,'/home/zhengly/PFmap/PFmap')
-from focal_loss import BinaryFocalLoss
-
-import argparse
+import annopro.data as data
+import annopro.model_param as model_param
+from annopro.focal_loss import BinaryFocalLoss
+from annopro.data_procession.utils import NAMESPACES, Ontology
+from importlib import resources
 
 
-parser = argparse.ArgumentParser(description='Arguments for main.py')
-parser.add_argument('--file_path', default=None, type=str)
-parser.add_argument('--gpu', action='store_true', default=True)
-parser.add_argument('--used_gpu', default="0", type=str)
-args = parser.parse_args()
+def predict(output_dir: str, promap_features_file: str,
+            used_gpu: str = "-1", diamond_scores_file: str = None):
+    if output_dir == None:
+        raise ValueError("Must provide the input fasta sequences.")
+    os.environ["CUDA_VISIBLE_DEVICES"] = used_gpu
+    for term_type in NAMESPACES.keys():
+        init_evaluate(term_type=term_type,
+                      promap_features_file=promap_features_file,
+                      diamond_scores_file=diamond_scores_file,
+                      output_dir=output_dir)
 
-
-case_file=os.path.join(args.file_path,"case.txt")
-protein_file=os.path.join(args.file_path,"protein.pkl")
-
-
-if args.file_path == None:
-    raise ValueError("Must provide the input fasta sequences.")
-if args.gpu == True:
-    os.environ["CUDA_VISIBLE_DEVICES"] = args.used_gpu
 
 class DFGenerator(Sequence):
     def __init__(self, df, terms_dict, nb_classes, batch_size):
@@ -50,7 +38,8 @@ class DFGenerator(Sequence):
         return np.ceil(len(self.df) / float(self.batch_size)).astype(np.int32)
 
     def __getitem__(self, idx):
-        batch_index = np.arange(idx * self.batch_size, min(self.size, (idx + 1) * self.batch_size))
+        batch_index = np.arange(idx * self.batch_size,
+                                min(self.size, (idx + 1) * self.batch_size))
         df = self.df.iloc[batch_index]
         labels = np.zeros((len(df), self.nb_classes), dtype=np.int32)
         feature_data = []
@@ -88,19 +77,21 @@ class DFGenerator(Sequence):
             self.reset()
             return self.next()
 
-def diamond_score(diamond_scores_file, label, data_path,term_path):
-    with open("/home/zhengly/promap/data/CAFA/go.pkl", 'rb') as file:
-        go = pickle.loads(file.read())
-    train_df = pd.read_pickle("/home/zhengly/PFmap/PFmap/data/cafa_train.pkl")
+
+def diamond_score(diamond_scores_file, label, data_path, term_type):
+    with resources.open_binary(data, "go.pkl") as file:
+        go: Ontology = pickle.load(file)
+        assert isinstance(go, Ontology)
+    with resources.open_binary(data, "cafa_train.pkl") as file:
+        train_df = pd.read_pickle(file)
     test_df = pd.read_pickle(data_path)
     annotations = train_df['Prop_annotations'].values
     annotations = list(map(lambda x: set(x), annotations))
 
-    
     prot_index = {}
     for i, row in enumerate(train_df.itertuples()):
         prot_index[row.Proteins] = i
-    
+
     diamond_scores = {}
     with open(diamond_scores_file) as f:
         for line in f:
@@ -133,12 +124,12 @@ def diamond_score(diamond_scores_file, label, data_path,term_path):
             for go_id, score in zip(allgos, sim):
                 annots[go_id] = score
         blast_preds.append(annots)
-    terms = pd.read_pickle(term_path)
+    with resources.open_binary(data, f"terms_{NAMESPACES[term_type]}.pkl") as term_path:
+        terms = pd.read_pickle(term_path)
     terms = terms['terms'].values.flatten()
-    terms_dict = {v: i for i, v in enumerate(terms)}
-    NAMESPACES = {'cc': 'cellular_component', 'mf': 'molecular_function', 'bp': 'biological_process'}
-    alphas = {NAMESPACES['mf']: 0.55, NAMESPACES['bp']: 0.6, NAMESPACES['cc']: 0.4}     
-    
+    alphas = {NAMESPACES['mf']: 0.55,
+              NAMESPACES['bp']: 0.6, NAMESPACES['cc']: 0.4}
+
     for i in range(0, len(label)):
         annots_dict = blast_preds[i].copy()
         for go_id in annots_dict:
@@ -147,55 +138,58 @@ def diamond_score(diamond_scores_file, label, data_path,term_path):
             go_id = terms[j]
             label[i, j] = label[i, j]*(1 - alphas[go.get_namespace(go_id)])
             if go_id in annots_dict:
-                label[i, j] =  label[i, j] + annots_dict[go_id]
-    return label        
+                label[i, j] = label[i, j] + annots_dict[go_id]
+    return label
+
 
 def plot_curve(history):
     plt.figure()
     x_range = range(0, len(history.history['loss']))
     plt.plot(x_range, history.history['loss'], 'bo', label='Training loss')
-    plt.plot(x_range, history.history['val_loss'], 'b', label='Validation loss')
+    plt.plot(x_range, history.history['val_loss'],
+             'b', label='Validation loss')
     plt.title('Training and validation loss')
     plt.legend()
 
 
-def init_evaluate(model_file, data_path, term_path, diamond=True, data_size=8000, batch_size=16):
-    with open(term_path, 'rb') as file:
-        terms_df = pickle.load(file)
-    with open(data_path, 'rb') as file:
-        data_df = pickle.load(file)
+def init_evaluate(term_type, promap_features_file, diamond_scores_file, output_dir: str,
+                  data_size=8000, batch_size=16):
+    with resources.open_binary(data, f"terms_{NAMESPACES[term_type]}.pkl") as file:
+        terms_df = pd.read_pickle(file)
+    with open(promap_features_file, 'rb') as file:
+        data_df = pd.read_pickle(file)
     if len(data_df) > data_size:
         data_df = data_df.sample(n=data_size)
-    data_df.index=range(len(data_df))
-    model = load_model(f'/home/zhengly/PFmap/PFmap/model_param/{model_file}.h5',custom_objects={"focus_loss":BinaryFocalLoss})
-    proteins=data_df["Proteins"]
+    data_df.index = range(len(data_df))
+    with resources.path(model_param, f"{term_type}.h5") as model_file_path:
+        model = load_model(
+            model_file_path.absolute(),
+            custom_objects={"focus_loss": BinaryFocalLoss})
+    proteins = data_df["Proteins"]
     terms = terms_df['terms'].values.flatten()
     terms_dict = {v: i for i, v in enumerate(terms)}
     nb_classes = len(terms)
     data_generator = DFGenerator(data_df, terms_dict, nb_classes, batch_size)
     data_steps = int(math.ceil(len(data_df) / batch_size))
     preds = model.predict(data_generator, steps=data_steps)
-    if diamond:
-        preds=diamond_score(case_file,preds,data_path,term_path=term_path)
+    if diamond_scores_file:
+        preds = diamond_score(diamond_scores_file, preds,
+                              promap_features_file, term_type=term_type)
     # label_di=defaultdict(list)
-    protein=[]
-    go_terms=[]
-    score=[]
+    protein = []
+    go_terms = []
+    score = []
     for i in range(len(preds)):
         for j in range(len(preds[i])):
-            if preds[i][j]>0:
+            if preds[i][j] > 0:
                 protein.append(proteins[i])
                 go_terms.append(terms[j])
                 score.append(preds[i][j])
-    res=[protein, go_terms, score]
-    res=pd.DataFrame(res)
-    res=res.T
-    res.columns=['Proteins', 'GO-terms', 'Scores']
+    res = [protein, go_terms, score]
+    res = pd.DataFrame(res)
+    res = res.T
+    res.columns = ['Proteins', 'GO-terms', 'Scores']
     res.sort_values(by='Scores', axis=0, ascending=False, inplace=True)
-    result_file=os.path.join(args.file_path,f"{model_file}_result.csv")
-    res.to_csv(result_file,sep=',',index=False,header=True)
+    result_file = os.path.join(output_dir, f"{term_type}_result.csv")
+    res.to_csv(result_file, sep=',', index=False, header=True)
     return res
-
-init_evaluate('mf',protein_file,term_path='/home/zhengly/PFmap/PFmap/data/terms_molecular_function.pkl')
-init_evaluate('bp',protein_file,term_path='/home/zhengly/PFmap/PFmap/data/terms_biological_process.pkl')
-init_evaluate('cc',protein_file,term_path='/home/zhengly/PFmap/PFmap/data/terms_cellular_component.pkl')
