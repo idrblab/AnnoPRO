@@ -2,11 +2,23 @@ from pathlib import Path
 from numpy.distutils.core import Extension
 from numpy.distutils.core import setup
 from setuptools import find_packages
+from annopro import (
+    __version__,
+    __author__,
+    __email__,
+    __url__,
+    __name__
+)
 
 PACKAGE_DIR = "."
 install_requires = Path("requirements.txt").read_text().split("\n")
 
 setup(
+    name = __name__,
+    version = __version__,
+    author = __author__,
+    author_email = __email__,
+    url = __url__,
     package_dir = {"": PACKAGE_DIR},
     install_requires = install_requires,
     packages = find_packages(where=PACKAGE_DIR),

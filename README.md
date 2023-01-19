@@ -47,12 +47,12 @@ python setup.py install
 ## Usage
 - Use it as a terminal command. For all parameters, type `annopro -h`.
 ```bash
-annopro test_proteins.fasta -o output
+annopro -i test_proteins.fasta -o output
 ```
 - Use it as a python executable package
 
 ```bash
-python -m annopro test_proteins.fasta -o output
+python -m annopro -i test_proteins.fasta -o output
 ```
 
 - Use it as a library to integrated with your project.
