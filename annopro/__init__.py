@@ -1,9 +1,13 @@
-__version__ = "0.1rc1"
+__version__ = "0.0.1rc1"
+__author__ = "Zheng.L.Y and Zhang.H.N"
+__email__ = "zhenglingyan@zju.edu.cn"
+__url__ = "https://github.com/idrblab/AnnoPRO/"
 
-import sys, os
+import sys
+import os
 
 if sys.platform == "win32":
-    # numpy.distutils.command.build_ext.build_ext 
+    # numpy.distutils.command.build_ext.build_ext
     # will add dynamic library to the root package's .libs
     # because they think it's a good idea to share the same .libs
     # so we have to add it to the path
@@ -11,10 +15,11 @@ if sys.platform == "win32":
     shared_libs = os.path.join(os.path.dirname(__file__), ".libs")
     os.add_dll_directory(shared_libs)
 
+
 def console_main():
     import argparse
     parser = argparse.ArgumentParser(description='Arguments for AnnoPRO')
-    parser.add_argument("fasta_file", help="The protein sequences file")
+    parser.add_argument("--fasta_file", "-i", help="The protein sequences file")
     parser.add_argument('--output', "-o", default=None,
                         type=str, help="Output directory")
     parser.add_argument('--used_gpu', default="-1", type=str,
@@ -27,7 +32,16 @@ def console_main():
                         default=False,
                         help="Overwrite existed output"
                         )
+    parser.add_argument("--version",
+                        action="store_true", default=False, help="Show version")
     args = parser.parse_args()
+    if args.version:
+        print("{} {}, Copyright Zhejiang University. \nAuthor: {}\nURL: {}".format(
+            __name__, __version__, __author__, __url__))
+        exit(0)
+    elif args.fasta_file is None:
+        parser.print_help()
+        exit(1)
     main(
         proteins_fasta_file=args.fasta_file,
         output_dir=args.output,
@@ -55,7 +69,7 @@ def main(proteins_fasta_file: str, output_dir: str = None,
         else:
             print(f"Output directory {output_dir} already existed!")
             exit(1)
-            
+
     profeat.run(proteins_fasta_file, output_dir)
 
     diamond_scores_file: str = None
