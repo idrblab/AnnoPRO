@@ -20,7 +20,8 @@ setup(
         name="annopro.data_procession._libprofeat",
         sources=[f"{PACKAGE_DIR}/annopro/data_procession/_libprofeat.f"],
         extra_f77_compile_args=[
-            "-fallow-argument-mismatch",
+            ## Uncomment this arg if you using latest gfortran
+            # "-fallow-argument-mismatch",
             "-w"]
     )],
     python_requires=">=3.8",
