@@ -1,5 +1,5 @@
 """
-This package contains required data for annopro
+This module manages all required resources for annopro.
 """
 from io import FileIO, TextIOWrapper
 import os
@@ -9,7 +9,7 @@ import hashlib
 RESOURCE_DIR = os.path.join(os.environ["HOME"], ".annopro/data")
 os.makedirs(RESOURCE_DIR, exist_ok=True)
 
-RESOURCE_URL = {
+RESOURCE_DICT = {
     "cafa_train.pkl": {
         "url": "http://localhost:8000/annopro/data/cafa_train.pkl",
         "md5sum": "07d3e4334c31c914efec3f52cae5e498"
@@ -51,15 +51,15 @@ RESOURCE_URL = {
         "md5sum": "002c3696fbca0061402a68129b35dcd4"
     },
     "bp.h5": {
-        "url": "http://localhost:8000/annopro/data/bp.h5",
+        "url": "http://localhost:8000/annopro/model_param/bp.h5",
         "md5sum": "7e19158e5252a70ff831f5f583b1c2ed"
     },
     "cc.h5": {
-        "url": "http://localhost:8000/annopro/data/cc.h5",
+        "url": "http://localhost:8000/annopro/model_param/cc.h5",
         "md5sum": "73876beec9370ff56b58878cf4446d2c"
     },
     "mf.h5": {
-        "url": "http://localhost:8000/annopro/data/mf.h5",
+        "url": "http://localhost:8000/annopro/model_param/mf.h5",
         "md5sum": "f4fb632f553afeb45571a29e46286bb8"
     }
 }
@@ -81,8 +81,8 @@ def md5check(file_path: str, expected: str):
 
 
 def download_resource(name: str, overwrite: bool = False) -> str:
-    if name in RESOURCE_URL:
-        resource = RESOURCE_URL[name]
+    if name in RESOURCE_DICT:
+        resource = RESOURCE_DICT[name]
         path_name = os.path.join(RESOURCE_DIR, name)
         if os.path.exists(path_name):
             if overwrite or not md5check(path_name, resource["md5sum"]):
@@ -94,13 +94,14 @@ def download_resource(name: str, overwrite: bool = False) -> str:
             url=resource["url"],
             out=path_name)
         print(f"\nValidate md5sum of {name}...")
-        assert md5check(path_name, resource["md5sum"])
+        if not md5check(path_name, resource["md5sum"]):
+            raise RuntimeError(f"{name} do not pass md5 validation, please visit https://github.com/idrblab/AnnoPRO for help")
         return path_name
     else:
         raise FileNotFoundError(f"Invalid resource name: {name}")
 
 
-def get_resource_path(name: str)-> str:
+def get_resource_path(name: str) -> str:
     return download_resource(name)
 
 
