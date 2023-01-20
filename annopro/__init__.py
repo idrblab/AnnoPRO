@@ -1,4 +1,4 @@
-__version__ = "0.0.1rc1"
+__version__ = "0.1rc1"
 __author__ = "Zheng.L.Y and Zhang.H.N"
 __email__ = "zhenglingyan@zju.edu.cn"
 __url__ = "https://github.com/idrblab/AnnoPRO/"
