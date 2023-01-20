@@ -1,6 +1,11 @@
 from pathlib import Path
-from numpy.distutils.core import Extension
-from numpy.distutils.core import setup
+try:
+    from numpy.distutils.core import Extension
+    from numpy.distutils.core import setup
+except ModuleNotFoundError as e:
+    print("AnnoPRO requires numpy to compile source code.")
+    print("Please run `pip install \"numpy<=1.19.5\"` first.")
+    exit(1)
 from setuptools import find_packages
 from annopro import (
     __version__,
