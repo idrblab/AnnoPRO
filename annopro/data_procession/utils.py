@@ -4,7 +4,6 @@ import numpy as np
 import pandas as pd
 import math
 from annopro import data
-from importlib import resources
 from typing import Union
 
 BIOLOGICAL_PROCESS = 'GO:0008150'
@@ -77,7 +76,7 @@ class Ontology(object):
     def load(self, with_rels):
         ont = dict()
         obj = None
-        with resources.open_text(data, "go.txt") as f:
+        with data.open_text("go.txt") as f:
             for line in f:
                 line = line.strip()
                 if not line:

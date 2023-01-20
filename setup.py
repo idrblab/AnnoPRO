@@ -24,9 +24,7 @@ setup(
     packages = find_packages(where=PACKAGE_DIR),
     include_package_data=True,
     package_data = {
-        'annopro.data': ['*'],
-        'annopro.data_procession._libprofeatconfig': ['*.sdf', '*.dat'],
-        'annopro.model_param': ['*.h5']
+        'annopro.data_procession._libprofeatconfig': ['*.sdf', '*.dat']
     },
     ext_modules = [Extension(
         name="annopro.data_procession._libprofeat",

@@ -2,7 +2,6 @@ import numpy as np
 import pandas as pd
 import pickle
 
-from importlib import resources
 from sklearn.metrics.pairwise import cosine_similarity
 from annopro.data_procession.utils import Ontology, load_data, MinMaxScaleClip
 from annopro.data_procession.profeat import profeat_to_df
@@ -40,18 +39,18 @@ class Data_process():
         proteins_f = profeat_to_df(self.protein_file)
         proteins_f.dropna(axis=0, inplace=True)
         feature_data = proteins_f.iloc[:, :self.num]
-        with resources.open_text(data, "cafa4_del.csv") as cafa4_del:
+        with data.open_text("cafa4_del.csv") as cafa4_del:
             mia_data = load_data(cafa4_del, 1485)
         mia_data.columns = range(len(mia_data.columns))
         feature_data = (feature_data - mia_data.min()) / \
             ((mia_data.max() - mia_data.min()) + 1e-8)
         self.feature_data:pd.DataFrame = feature_data
         self.proteins = list(proteins_f.index)
-        with resources.open_binary(data, self.grid_file) as gf:
+        with data.open_binary(self.grid_file) as gf:
             self.data_grid = pickle.load(gf)
-        with resources.open_binary(data, self.assess_file) as af:
+        with data.open_binary(self.assess_file) as af:
             self.row_asses = pickle.load(af)
-        with resources.open_text(data, self.prosim_file) as pf:
+        with data.open_text(self.prosim_file) as pf:
             prosim_data = load_data(pf, 1485)
         # this will be minmax by column
         prosim_standard = MinMaxScaleClip(prosim_data)

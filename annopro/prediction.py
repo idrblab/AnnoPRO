@@ -7,10 +7,8 @@ import pandas as pd
 import math
 import pickle
 import annopro.data as data
-import annopro.model_param as model_param
 from annopro.focal_loss import BinaryFocalLoss
 from annopro.data_procession.utils import NAMESPACES, Ontology
-from importlib import resources
 
 
 def predict(output_dir: str, promap_features_file: str,
@@ -79,10 +77,10 @@ class DFGenerator(Sequence):
 
 
 def diamond_score(diamond_scores_file, label, data_path, term_type):
-    with resources.open_binary(data, "go.pkl") as file:
+    with data.open_binary("go.pkl") as file:
         go: Ontology = pickle.load(file)
         assert isinstance(go, Ontology)
-    with resources.open_binary(data, "cafa_train.pkl") as file:
+    with data.open_binary("cafa_train.pkl") as file:
         train_df = pd.read_pickle(file)
     test_df = pd.read_pickle(data_path)
     annotations = train_df['Prop_annotations'].values
@@ -124,7 +122,7 @@ def diamond_score(diamond_scores_file, label, data_path, term_type):
             for go_id, score in zip(allgos, sim):
                 annots[go_id] = score
         blast_preds.append(annots)
-    with resources.open_binary(data, f"terms_{NAMESPACES[term_type]}.pkl") as term_path:
+    with data.open_binary(f"terms_{NAMESPACES[term_type]}.pkl") as term_path:
         terms = pd.read_pickle(term_path)
     terms = terms['terms'].values.flatten()
     alphas = {NAMESPACES['mf']: 0.55,
@@ -154,17 +152,16 @@ def plot_curve(history):
 
 def init_evaluate(term_type, promap_features_file, diamond_scores_file, output_dir: str,
                   data_size=8000, batch_size=16):
-    with resources.open_binary(data, f"terms_{NAMESPACES[term_type]}.pkl") as file:
+    with data.open_binary(f"terms_{NAMESPACES[term_type]}.pkl") as file:
         terms_df = pd.read_pickle(file)
     with open(promap_features_file, 'rb') as file:
         data_df = pd.read_pickle(file)
     if len(data_df) > data_size:
         data_df = data_df.sample(n=data_size)
     data_df.index = range(len(data_df))
-    with resources.path(model_param, f"{term_type}.h5") as model_file_path:
-        model = load_model(
-            model_file_path.absolute(),
-            custom_objects={"focus_loss": BinaryFocalLoss})
+    model = load_model(
+        data.get_resource_path(f"{term_type}.h5"),
+        custom_objects={"focus_loss": BinaryFocalLoss})
     proteins = data_df["Proteins"]
     terms = terms_df['terms'].values.flatten()
     terms_dict = {v: i for i, v in enumerate(terms)}
