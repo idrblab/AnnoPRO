@@ -6,7 +6,7 @@ import os
 import wget
 import hashlib
 
-RESOURCE_DIR = os.path.join(os.environ["HOME"], ".annopro/data")
+RESOURCE_DIR = os.path.join(os.path.expanduser("~"), ".annopro/data")
 os.makedirs(RESOURCE_DIR, exist_ok=True)
 
 RESOURCE_DICT = {
