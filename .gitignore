@@ -133,4 +133,4 @@ annopro/data/*
 annopro/model_param/*
 
 *.pyc
-test_output
+*output
