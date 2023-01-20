@@ -1,6 +1,6 @@
 import annopro.data_procession.profeat as pf
 import os
-import annopro.data as data
+import annopro.resources as resources
 import shutil
 from annopro.data_procession.blast import blastp
 from annopro.data_procession import process
@@ -15,13 +15,14 @@ if os.path.isdir(output_dir):
 pf.run(protein_fasta_file, output_dir)
 
 # blastp ok
-blastp(data.get_resource_path("cafa4.dmnd"), protein_fasta_file, f"{output_dir}/case.txt")
+diaonds = f"{output_dir}/diamond_scores.txt"
+blastp(resources.get_resource_path("cafa4.dmnd"), protein_fasta_file, diaonds)
 
 # ok
 promap_file = f"{output_dir}/promap_features.pkl"
 process(protein_fasta_file, f"{output_dir}/output-protein.dat", promap_file)
 
 # ok
-predict(output_dir, promap_file, "0")
+predict(output_dir, promap_file, "0", diamond_scores_file=diaonds)
 
 
