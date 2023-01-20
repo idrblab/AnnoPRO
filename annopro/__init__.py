@@ -13,7 +13,9 @@ if sys.platform == "win32":
     # so we have to add it to the path
     # here is just for profeat fortran extension module
     shared_libs = os.path.join(os.path.dirname(__file__), ".libs")
-    os.add_dll_directory(shared_libs)
+    # During building, the .libs folder does not exist yet
+    if os.path.isdir(shared_libs):
+        os.add_dll_directory(shared_libs)
 
 
 def console_main():
