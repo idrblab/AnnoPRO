@@ -1,6 +1,5 @@
 import os
 from tensorflow.keras.utils import Sequence
-import matplotlib.pyplot as plt
 from tensorflow.keras.models import load_model
 import numpy as np
 import pandas as pd
@@ -138,16 +137,6 @@ def diamond_score(diamond_scores_file, label, data_path, term_type):
             if go_id in annots_dict:
                 label[i, j] = label[i, j] + annots_dict[go_id]
     return label
-
-
-def plot_curve(history):
-    plt.figure()
-    x_range = range(0, len(history.history['loss']))
-    plt.plot(x_range, history.history['loss'], 'bo', label='Training loss')
-    plt.plot(x_range, history.history['val_loss'],
-             'b', label='Validation loss')
-    plt.title('Training and validation loss')
-    plt.legend()
 
 
 def init_evaluate(term_type, promap_features_file, diamond_scores_file, output_dir: str,
