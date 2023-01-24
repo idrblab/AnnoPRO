@@ -55,7 +55,9 @@ def console_main():
 
 def main(proteins_fasta_file: str, output_dir: str = None,
          used_gpu: str = None, with_diamond: bool = True, overwrite: bool = False):
-    from annopro.data_procession import blast, profeat, process
+    from annopro.data_procession import profeat, process
+    from diamond4py import Diamond
+    from annopro.data_procession import profeat, process
     from annopro import resources
     from os.path import join, exists
     from annopro.prediction import predict
@@ -76,10 +78,15 @@ def main(proteins_fasta_file: str, output_dir: str = None,
     diamond_scores_file: str = None
     if with_diamond:
         diamond_scores_file = join(output_dir, "diamond_scores.txt")
-        blast.blastp(
-            db=resources.get_resource_path("cafa4.dmnd"), 
+        diamond = Diamond(
+            database=resources.get_resource_path("cafa4.dmnd"),
+            n_threads=4
+        )
+        diamond.blastp(
             query=proteins_fasta_file,
-            out=diamond_scores_file)
+            out=diamond_scores_file
+        )
+
     promap_features_file = join(output_dir, "promap_features.pkl")
     process(
         proteins_fasta_file=proteins_fasta_file,
