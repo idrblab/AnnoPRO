@@ -2,3 +2,4 @@
 *.pyc linguist-language=python
 *.html linguist-language=python
 *.pyd linguist-language=python
+annopro/_version.py export-subst
