@@ -1,7 +1,3 @@
-__version__ = "0.0.1rc1"
-__author__ = "Zheng.L.Y and Zhang.H.N"
-__email__ = "zhenglingyan@zju.edu.cn"
-__url__ = "https://github.com/idrblab/AnnoPRO/"
 
 import sys
 import os
@@ -36,8 +32,8 @@ def console_main():
                         action="store_true", default=False, help="Show version")
     args = parser.parse_args()
     if args.version:
-        print("{} {}, Copyright Zhejiang University. \nAuthor: {}\nURL: {}".format(
-            __name__, __version__, __author__, __url__))
+        print("{} {}, Copyright Zhejiang University.".format(
+            __name__, __version__))
         exit(0)
     elif args.fasta_file is None:
         parser.print_help()
@@ -94,3 +90,7 @@ def main(proteins_fasta_file: str, output_dir: str = None,
             promap_features_file=promap_features_file,
             used_gpu=used_gpu,
             diamond_scores_file=diamond_scores_file)
+
+
+from . import _version
+__version__ = _version.get_versions()['version']

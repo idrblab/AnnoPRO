@@ -1,0 +1,41 @@
+[build-system]
+requires = [
+    "setuptools>=42",
+    "numpy<=1.19.5",
+    "versioneer[toml]==0.26"
+]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "annopro"
+authors = [
+    {name="Zheng.L.Y", email="zhenglingyan@zju.edu.cn"},
+    {name="Zhang.H.N", email="zhang.h.n@foxmail.com"}
+]
+description = "A simple python package for annotating protein sequences"
+readme = "README.md"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Topic :: Scientific/Engineering :: Bio-Informatics",
+    "Environment :: Console"
+]
+license = {text = "MIT"}
+requires-python = ">=3.8"
+dynamic = ["version", "dependencies"]
+
+[project.urls]
+"Homepage" = "https://github.com/idrblab/AnnoPRO"
+"Bug Tracker" = "https://github.com/idrblab/AnnoPRO/issues"
+
+[project.scripts]
+"annopro" = "annopro:console_main"
+
+[tool.versioneer]
+VCS = "git"
+style = "pep440"
+versionfile_source = "annopro/_version.py"
+versionfile_build = "annopro/_version.py"
+tag_prefix = "v"
+parentdir_prefix = "annopro-"
