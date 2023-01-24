@@ -57,7 +57,6 @@ def main(proteins_fasta_file: str, output_dir: str = None,
          used_gpu: str = None, with_diamond: bool = True, overwrite: bool = False):
     from annopro.data_procession import profeat, process
     from diamond4py import Diamond
-    from annopro.data_procession import profeat, process
     from annopro import resources
     from os.path import join, exists
     from annopro.prediction import predict
