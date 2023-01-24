@@ -7,3 +7,4 @@ tensorflow>=2.5.0,<=2.6.5
 threadpoolctl>=3.1.0
 fasta>=2.3.2
 wget
+diamond4py>=0.0.2rc2
