@@ -1,0 +1,108 @@
+name: pypi
+
+# 任务触发
+on:
+  # 当 提交到当前仓库时立即运行
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy: 
+      matrix:
+        py_version: ['3.7', '3.8', '3.9', '3.10']
+        os: ['ubuntu-18.04', 'macos-12', 'windows-2022']
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: "Setup Python"
+        uses: actions/setup-python@v4
+        with:
+           python-version: ${{ matrix.py_version }}
+
+      - name: Setup MSBuild.exe
+        if: startsWith(matrix.os, 'windows')
+        uses: microsoft/setup-msbuild@v1.1
+
+      - name: "Build and test for Linux"
+        if: startsWith(matrix.os, 'windows')==false
+        shell: bash -el {0}
+        run: |
+          pip install --upgrade pip &&
+          pip install build &&
+          python -m build &&
+          pip install dist/annopro*whl &&
+          annopro --version
+
+      - name: "Build and test for Windows"
+        if: startsWith(matrix.os, 'windows')
+        shell: powershell
+        run: |
+          pip install --upgrade pip;
+          pip install build ;
+          python -m build ;
+          Get-ChildItem -Path dist -Filter annopro*whl | ForEach-Object{ pip install "dist\$_" };
+          annopro --version
+
+      - name: "Repair manylinux"
+        shell: bash -el {0}
+        if: startsWith(matrix.os, 'ubuntu')
+        run: |
+          pip install auditwheel==5.0.0 &&
+          auditwheel show dist/*-linux*whl && 
+          auditwheel repair dist/*-linux*whl --plat manylinux_2_27_x86_64 -w dist &&
+          rm dist/*-linux*whl
+
+      - name: Get version
+        id: version
+        uses: frabert/replace-string-action@v2
+        with:
+          pattern: 'refs/tags/v(.+)'
+          string: ${{ github.ref }}
+          replace-with: 'v$1'
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: build_${{ steps.version.outputs.replaced }}
+          path: dist/*
+          retention-days: 1
+
+  release:
+    needs: ["build"]
+    runs-on: ubuntu-18.04
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Get version
+        id: version
+        uses: frabert/replace-string-action@v2
+        with:
+          pattern: 'refs/tags/v(.+)'
+          string: ${{ github.ref }}
+          replace-with: 'v$1'
+
+      - uses: actions/download-artifact@v3
+        with:
+          name: build_${{ steps.version.outputs.replaced }}
+          path: dist/
+
+      - name: Release to GitHub
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: dist/*
+          draft: true
+
+      - name: Relase to PyPi
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with: 
+          user: __token__
+          password: ${{ secrets.PYPI_API_TOKEN }}
+          repository_url: ${{ vars.PYPI_URL }}
+          packages_dir: dist/
