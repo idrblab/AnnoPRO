@@ -39,8 +39,7 @@ git clone https://github.com/idrblab/AnnoPRO.git
 cd AnnoPRO
 conda create -n annopro python=3.8
 conda activate annopro
-pip install -r requirements.txt
-python setup.py install
+pip install .
 ```
 
 ## Usage
