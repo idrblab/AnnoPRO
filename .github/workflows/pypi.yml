@@ -30,9 +30,17 @@ jobs:
         if: startsWith(matrix.os, 'windows')
         uses: microsoft/setup-msbuild@v1.1
 
-      - name: Setup GCC for MacOS
-        if: startsWith(matrix.os, 'macos')
-        run: brew install gcc
+      - name: Setup fortran
+        uses: awvwgk/setup-fortran@main
+        id: setup-fortran
+        with:
+          compiler: gcc
+          version: 11
+
+      - name: Check fortran version
+        run: ${{ env.FC }} --version
+        env:
+          FC: ${{ steps.setup-fortran.outputs.fc }}
 
       - name: "Build and test for Linux"
         if: startsWith(matrix.os, 'windows')==false
