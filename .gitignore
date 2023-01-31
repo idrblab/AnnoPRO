@@ -129,8 +129,8 @@ dmypy.json
 .pyre/
 
 # Ignore data and model params
-annopro/data/*
-annopro/model_param/*
+data/*
+model_param/*
 
 *.pyc
-test_output
+*output

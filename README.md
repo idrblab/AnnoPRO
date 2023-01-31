@@ -39,8 +39,7 @@ git clone https://github.com/idrblab/AnnoPRO.git
 cd AnnoPRO
 conda create -n annopro python=3.8
 conda activate annopro
-pip install -r requirements.txt
-python setup.py install
+pip install .
 ```
 
 ## Usage
@@ -62,8 +61,9 @@ main("test_proteins.fasta", "output")
 
 The result is displayed in the `./output/bp(cc,mf)_result.csv`.
 
-## Note
-AnnoPRO is tested to work under Python 3.8. and  cuda 11.2.
+**Notice**: if you use annopro for the first time, annopro will
+automatically download required resources when they are used
+(lazy download mechanism)
 
 ## Possible problems
 1. pip is looking at multiple versions of XXX to determine which version is compatible with other requirements. this could take a while.
