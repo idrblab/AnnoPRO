@@ -15,7 +15,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy: 
       matrix:
-        py_version: ['3.7', '3.8', '3.9', '3.10']
+        py_version: ['3.8', '3.9', '3.10']
         os: ['ubuntu-18.04', 'macos-12', 'windows-2022']
 
     steps:
@@ -29,6 +29,10 @@ jobs:
       - name: Setup MSBuild.exe
         if: startsWith(matrix.os, 'windows')
         uses: microsoft/setup-msbuild@v1.1
+
+      - name: Setup GCC for MacOS
+        if: startsWith(matrix.os, 'macos')
+        run: brew install gcc
 
       - name: "Build and test for Linux"
         if: startsWith(matrix.os, 'windows')==false
