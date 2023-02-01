@@ -11,8 +11,39 @@ permissions:
   contents: write
 
 jobs:
+  source-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: "Setup Python"
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.8
+      
+      - name: "Build source"
+        run: |
+          pip install --upgrade pip &&
+          pip install build &&
+          python -m build --sdist
+
+      - name: Get version
+        id: version
+        uses: frabert/replace-string-action@v2
+        with:
+          pattern: 'refs/tags/v(.+)'
+          string: ${{ github.ref }}
+          replace-with: 'v$1'
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: build_${{ steps.version.outputs.replaced }}
+          path: dist/*.tar.gz
+          retention-days: 1
+
   manylinux-build:
     runs-on: ubuntu-latest
+    needs: ["source-build"]
     strategy:
       matrix:
         py_version: ['cp38-cp38', 'cp39-cp39']
@@ -27,12 +58,18 @@ jobs:
           string: ${{ github.ref }}
           replace-with: 'v$1'
 
+      - uses: actions/download-artifact@v3
+        with:
+          name: build_${{ steps.version.outputs.replaced }}
+          path: dist/
+
       - name: Build on manylinux2010
-        uses: GCS-ZHN/python-wheels-manylinux-build@v1.0
+        uses: GCS-ZHN/python-wheels-manylinux-build@v1.1
         with:
           python-versions: ${{ matrix.py_version }}
           build-requirements: 'versioneer[toml] numpy<=1.19.5 setuptools>=42'
-          system-packages: gcc-gfortran
+          # system-packages: gcc-gfortran
+          source: dist/*.tar.gz
 
       - uses: actions/upload-artifact@v3
         with:
@@ -42,6 +79,7 @@ jobs:
 
   other-build:
     runs-on: ${{ matrix.os }}
+    needs: ["source-build"]
     strategy: 
       matrix:
         py_version: ['3.8', '3.9']
@@ -64,7 +102,7 @@ jobs:
         id: setup-fortran
         with:
           compiler: gcc
-          version: 11
+          version: 8
 
       - name: Check fortran version
         run: ${{ env.FC }} --version
@@ -76,7 +114,7 @@ jobs:
         run: |
           pip install --upgrade pip &&
           pip install build &&
-          python -m build &&
+          python -m build --wheel &&
           pip install dist/annopro*whl &&
           annopro --version
 
@@ -84,8 +122,8 @@ jobs:
         if: startsWith(matrix.os, 'windows')
         run: |
           pip install --upgrade pip;
-          pip install build ;
-          python -m build ;
+          pip install build;
+          python -m build --wheel;
           Get-ChildItem -Path dist -Filter annopro*whl | ForEach-Object{ pip install "$_" };
           annopro --version
 

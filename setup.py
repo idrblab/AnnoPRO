@@ -19,7 +19,7 @@ setup(
         sources=[f"{PACKAGE_DIR}/annopro/data_procession/_libprofeat.f"],
         extra_f77_compile_args=[
             ## Uncomment this arg if you using latest gfortran
-            "-fallow-argument-mismatch",
+            # "-fallow-argument-mismatch",
             "-w"]
     )],
     version=versioneer.get_version(),
