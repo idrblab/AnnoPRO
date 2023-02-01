@@ -77,13 +77,12 @@ jobs:
           path: dist/*-manylinux*.whl
           retention-days: 1
 
-  other-build:
-    runs-on: ${{ matrix.os }}
+  win-build:
+    runs-on: 'windows-2022'
     needs: ["source-build"]
     strategy: 
       matrix:
         py_version: ['3.8', '3.9']
-        os: ['windows-2022', 'macos-12']
 
     steps:
       - uses: actions/checkout@v3
@@ -109,17 +108,7 @@ jobs:
         env:
           FC: ${{ steps.setup-fortran.outputs.fc }}
 
-      - name: "Build and test for Linux"
-        if: startsWith(matrix.os, 'windows')==false
-        run: |
-          pip install --upgrade pip &&
-          pip install build &&
-          python -m build --wheel &&
-          pip install dist/annopro*whl &&
-          annopro --version
-
       - name: "Build and test for Windows"
-        if: startsWith(matrix.os, 'windows')
         run: |
           pip install --upgrade pip;
           pip install build;
@@ -142,7 +131,7 @@ jobs:
           retention-days: 1
 
   release:
-    needs: ["other-build", "manylinux-build"]
+    needs: ["win-build", "manylinux-build"]
     runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@v3
