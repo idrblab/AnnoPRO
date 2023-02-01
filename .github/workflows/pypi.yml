@@ -11,12 +11,41 @@ permissions:
   contents: write
 
 jobs:
-  build:
+  manylinux-build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        py_version: ['cp38-cp38', 'cp39-cp39']
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Get version
+        id: version
+        uses: frabert/replace-string-action@v2
+        with:
+          pattern: 'refs/tags/v(.+)'
+          string: ${{ github.ref }}
+          replace-with: 'v$1'
+
+      - name: Build on manylinux2010
+        uses: GCS-ZHN/python-wheels-manylinux-build@v1.0
+        with:
+          python-versions: ${{ matrix.py_version }}
+          build-requirements: 'versioneer[toml] numpy<=1.19.5 setuptools>=42'
+          system-packages: gcc-gfortran
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: build_${{ steps.version.outputs.replaced }}
+          path: dist/*-manylinux*.whl
+          retention-days: 1
+
+  other-build:
     runs-on: ${{ matrix.os }}
     strategy: 
       matrix:
         py_version: ['3.8', '3.9']
-        os: ['ubuntu-18.04', 'windows-2022', 'macos-12']
+        os: ['windows-2022', 'macos-12']
 
     steps:
       - uses: actions/checkout@v3
@@ -60,14 +89,6 @@ jobs:
           Get-ChildItem -Path dist -Filter annopro*whl | ForEach-Object{ pip install "$_" };
           annopro --version
 
-      - name: "Repair manylinux"
-        if: startsWith(matrix.os, 'ubuntu')
-        run: |
-          pip install auditwheel==5.0.0 &&
-          auditwheel show dist/*-linux*whl && 
-          auditwheel repair dist/*-linux*whl --plat manylinux_2_27_x86_64 -w dist &&
-          rm dist/*-linux*whl
-
       - name: Get version
         id: version
         uses: frabert/replace-string-action@v2
@@ -83,7 +104,7 @@ jobs:
           retention-days: 1
 
   release:
-    needs: ["build"]
+    needs: ["other-build", "manylinux-build"]
     runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@v3
