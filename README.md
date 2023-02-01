@@ -1,8 +1,10 @@
 # AnnoPRO
 ![AUR](https://img.shields.io/badge/license-MIT-blue.svg)
 ![python](https://img.shields.io/badge/python->=3.8-success.svg)
+[![pypi](https://github.com/idrblab/AnnoPRO/actions/workflows/pypi.yml/badge.svg)](https://pypi.org/project/annopro/)
 ![keras](https://img.shields.io/badge/keras-2.5.0-success.svg)
 ![PMID](https://img.shields.io/badge/PMID-Not%20available-red.svg)
+
 ## AnnoPRO generation
 * step 1: input proteins sequeces
 * step 2: features extraction by Profeat
