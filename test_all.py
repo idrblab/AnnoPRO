@@ -1,4 +1,4 @@
-import annopro.data_procession.profeat as pf
+import profeat as pf
 import os
 import annopro.resources as resources
 import shutil

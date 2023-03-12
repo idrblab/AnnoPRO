@@ -4,7 +4,7 @@ import pickle
 
 from sklearn.metrics.pairwise import cosine_similarity
 from annopro.data_procession.utils import Ontology, load_data, MinMaxScaleClip
-from annopro.data_procession.profeat import profeat_to_df
+from profeat import profeat_to_df
 from annopro import resources
 from fasta import FASTA
 
