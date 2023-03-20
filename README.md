@@ -72,11 +72,6 @@ automatically download required resources when they are used
 
 Your pip is latest, back to old version such as 20.2, or just add `--use-deprecated=legacy-resolver` param.
 
-2. Argument mismatch when building source code.
-
-Because your gfortran is latest and imcompatible,
-edit setup.py and uncomment `-fallow-argument-mismatch` or 
-just use a earlier version of gfortran such as 4.8.5, 8.4
 
 ## Contact
 If any questions, please create an [issue](https://github.com/idrblab/AnnoPRO/issues/new/choose) on this repo, we will deal with it as soon as possible.
