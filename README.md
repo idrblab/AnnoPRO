@@ -18,24 +18,8 @@
 * Decoding layers: LSTMs
 ![image](https://user-images.githubusercontent.com/76670356/204524869-31f558f0-0298-48c5-b4d2-3d5d087a2def.png)
 ## Installation
-1. install compilers
-
-dependency `lapjv` requires `g++` or other Cpp compiler, and annopro contains fortran extensional module and require `gfortran` or other fortran compiler. Here is an example of installing them on Ubuntu.
-
-```bash
-sudo apt install gcc g++ gfortran
-# or you can install by conda in your virtual env
-# command name is like 
-# gcc: x86_64-conda_cos6-linux-gnu-cc
-# g++: x86_64-conda_cos6-linux-gnu-c++
-# gfortran: x86_64-conda_cos6-linux-gnu-gfortran
-conda install gcc_linux-64 gxx_linux-64 gfortran_linux-64
-```
-
-2. install annopro
 
 You can install it directly by `pip install annopro` or install from source code as following steps.
-But you should install numpy first if you install it from source code because we need `numpy.f2py` to help us build fortran extension submodule.
 ```bash
 git clone https://github.com/idrblab/AnnoPRO.git
 cd AnnoPRO
