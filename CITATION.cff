@@ -1,0 +1,33 @@
+# This CITATION.cff file was generated with cffinit.
+# Visit https://bit.ly/cffinit to generate yours today!
+
+cff-version: 1.2.0
+title: >-
+  AnnoPRO: an innovative strategy for protein function
+  annotation based on image-like protein representation and
+  multimodal deep learnin
+message: >-
+  If you use this software, please cite it using the
+  metadata from this file.
+type: software
+authors:
+  - given-names: Lingyan
+    family-names: Zheng
+    affiliation: Zhejiang University
+    email: zhenglingyan@zju.edu.cn
+    orcid: 'https://orcid.org/0000-0001-7533-2649'
+  - given-names: Hongning
+    family-names: Zhang
+    affiliation: Zhejiang University
+    orcid: 'https://orcid.org/0000-0002-7818-7915'
+    email: zhanghn@zju.edu.cn
+repository-code: 'https://github.com/idrblab/AnnoPRO'
+url: 'https://idrblab.org/annopro/'
+keywords:
+  - protein functional annotation
+  - deep learning
+  - feature embedding
+license: MIT
+commit: 1743925a08c7171f071c735e017b0019b758c460
+version: '0.2'
+date-released: '2023-03-13'
