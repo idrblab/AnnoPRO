@@ -3,7 +3,7 @@
 ![python](https://img.shields.io/badge/python->=3.8-success.svg)
 [![pypi](https://github.com/idrblab/AnnoPRO/actions/workflows/pypi.yml/badge.svg)](https://pypi.org/project/annopro/)
 ![keras](https://img.shields.io/badge/keras-2.5.0-success.svg)
-![PMID](https://img.shields.io/badge/PMID-Not%20available-red.svg)
+[![DOI](https://img.shields.io/badge/DOI-10.1101/2023.05.13.540619-blue.svg)](https://doi.org/10.1101/2023.05.13.540619)
 
 ## AnnoPRO generation
 * step 1: input proteins sequeces
