@@ -12,13 +12,16 @@
 * Step4: Feature 2D embedding --> umap, tsne, mds
 * Step5: Feature grid arrangement --> grid, scatter
 * Step5: Transform --> minmax, standard
-![image](https://user-images.githubusercontent.com/76670356/204513203-2f0a430b-4b2c-4b1e-9587-3ee5a953150b.png)
+
+![image](https://github.com/idrblab/AnnoPRO/assets/76670356/f5c2f253-1dc3-4555-818d-2482d0128725)
+
 ## AnnoPRO architecture
 * Encoding layers: Protein features was learned by CNNs and Protein similarity was learned by FCs.
 * Decoding layers: LSTMs
-![image](https://user-images.githubusercontent.com/76670356/204524869-31f558f0-0298-48c5-b4d2-3d5d087a2def.png)
-## Installation
 
+![image](https://github.com/idrblab/AnnoPRO/assets/76670356/cf890095-cb19-4633-8af5-1a20a8a0ea24)
+
+## Installation
 You can install it directly by `pip install annopro` or install from source code as following steps.
 ```bash
 git clone https://github.com/idrblab/AnnoPRO.git
